@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>23.3 数据存储 - 离线应用与客户端存储</title>
+</head>
+
+<body>
+    23.3 数据存储
+    随着Web应用程序的出现，也产生了对于能够直接在客户端上存储用户信息能力的要求。想法很合乎逻辑，属于某个特定用户的信息应该存在该用户的机器上。
+    无论是登录信息、偏好设定或其他数据，Web应用提供者发现他们在找各种方式将数据存在客户端上。
+
+-----------------------------------------------------------
+
+    23.3.1 Cookie
+    HTTP Cookie 通常直接叫做cookie，最初是在客户端存储会话信息的。
+    该标准要求服务器对任意HTTP请求发送Set-Cookie HTTP头作为响应的一部分，其中包含会话信息。例如，这种服务器响应的头可能如下：
+    ------------------------
+    HTTP/1.1 200 OK
+    Content-type: text/html
+    Set-Cookie: name=value
+    Other-header: other-header-value
+    ------------------------
+    这个HTTP响应设置以name为名称、以value为值的一个cookie，名称和值在传送时都必须是URL编码的。
+    浏览器会存储这样的会话信息，并在这之后，通过为每个请求添加Cookie HTTP 头将信息发送回服务器，如下所示：
+    ------------------------
+    GET /index.html HTTP/1.1
+    Cookie: name=value
+    Other-header: other-header-value
+    ------------------------
+    发送回服务器的额外信息可以用于唯一验证客户来自于发送的哪个请求。
+
+
+    -----------------------------------------------------------
+
+    1. 限制
+
+    cookie在性质上是绑定在特定域名下的。当设定了一个cookie后，再给创建它的域名发送请求时，都会包含这个cookie。
+    这个限制确保了储存在cookie中的信息只能让批准的接受者访问，而无法被其他域访问。
+
+    由于cookie是存在客户端计算机上的，还加入了一些限制确保cookie不会被恶意使用，同时不会占据太多磁盘空间。
+    每个域的cookie总数是有限的，不过浏览器之间各有不同。
+    · IE6及更低版本限制每个域名最多20个cookie。
+    · IE7及以上每个域名最多50个cookie。
+    · Firefox限制每个域名最多50个cookie。
+    · Opera限制每个域最多30个cookie。
+    · Safari和Chrome对每个域的cookie数量限制没有硬性规定。
+    当超过单个域名限制之后还要在设置cookie，浏览器就会清除以前设置的cookie。
+    考虑cookie限制非常重要，以免出现不可预期的后果。
+
+    浏览器对cookie的尺寸也有限制。
+    大多数浏览器都有大约4096B（加减1）的长度限制。为了最佳的浏览器兼容性，最好将整个cookie的长度限制在4095B（含4095）以内。
+    尺寸限制影响到一个域下的所有cookie，而并非每个cookie单独限制。
+
+    如果创建超过最大尺寸限制的cookie，那么该cookie会被无声无息的丢掉。
+
+    -----------------------------------------------------------
+
+    2. cookie 的构成
+
+    cookie由浏览器保存的以下几块信息构成：
+    · 名称：一个唯一确定cookie的名称。最好区分大小写，cookie的名称是必须经过编码的。
+    · 值：储存在cookie中的字符串值。值必须被URL编码。
+    · 域：cookie对于哪个域是有效的。
+        　所有向该域发送的请求中都会包含这个cookie信息。这个值可以包含子域，也可以不包含它。
+        　如果没有明确设定，那么这个域会被认作来自设置cookie的那个域。
+    · 路径：对于指定域中的那个路径，应该向服务器发送cookie。
+        　　例如，你可以指定cookie只有从http://www.wrox.com/books/ 中才能访问，那么http://www.wrox.com 的页面就不会发送cookie信息，即使请求都是来自同一个域的。
+    · 失效时间：表示cookie何时应该被删除的时间戳（也就是，何时应该停止向服务器发送这个cookie）。
+            　 默认情况下，浏览器会话结束时即将所有cookie删除；也可以自己设置删除时间。
+            　 这个值是个GMT格式的日期（Wdy, DD-Mon-YYYY HH:MM:SS GMT），用于指定删除cookie的准确时间。
+    · 安全标志：secure，指定后，cookie只有在使用SSL连接的时候才发送到服务器。
+                例如，cookie信息只能发送给https://www.wrox.com，而http://www.wrox.com的请求则不能发送cookie。
+
+    每一段信息都做为Set-Cookie头的一部分，使用分号加空格分隔每一段，如下例所示：
+    ------------------------
+    HTTP/1.1 200 OK
+    Content-type: text/html
+    Set-Cookie: name=value; expires=Mon, 22-Jan-07 07:10:24 GMT; domain=.wrox.com; path=/; secure
+    Other-header: other-header-value
+    ------------------------
+
+    注意：域、路径、失效时间和secure标志都是服务器给浏览器的指示，以指定何时应该发送cookie。这些参数不会作为发送到服务器的cookie信息的一部分，只有名值对才会被发送。
+
+    -----------------------------------------------------------
+
+    3. JavaScript中的Cookie
+
+    在JavaScript中处理cookie有些复杂，因为其众所周知的蹩脚接口，即BOM的document.cookie属性。
+    这个属性的独特之处在于它会因为使用它的方式不同而表现出不同的行为。
+
+    当用来获取属性值时，document.cookie返回当前页面可用的（根据cookie的域、路径、失效时间和安全设置）所有cookie的字符串，一系列由分号隔开的名值对，如下所示：
+    name1=value1;name2=value2;name3=value3
+    所有名字和值都是经过URL编码的，所以必须使用decodeURIComponent()来解码。
+
+    当用于设置值的时候，document.cookie属性可以设置一个新的cookie字符串，这个字符串会被解释并添加到现有的cookie集合中。
+    设置document.cookie并不会覆盖cookie，除非设置的cookie的名称已经存在。
+    设置cookie的格式如下，和Set-Cookie头中使用的格式一样。
+    name=value; expires=expiration_time; path=domain_path; domain=domain_name; secure
+    这些参数中，只有cookie的名字和值是必须的。
+    <script>
+        var end_time = new Date();
+        console.log("end_time--->", end_time);
+        console.log("end_time--->", end_time.getTime());
+        console.log("end_time--->", end_time.getTime() - 1*24*60*60*1000);
+        end_time.setTime(end_time.getTime() - 1*24*60*60*1000);
+        document.cookie = "csrftoken=; expires=" + end_time.toUTCString() + "domain=localhost";
+        document.cookie = "sessionid=; expires=" + end_time.toUTCString() + "domain=localhost";
+        document.cookie = "username=; expires=" + end_time.toUTCString() + "domain=localhost";
+        document.cookie = "is_superuser=; expires=" + end_time.toUTCString() + "domain=localhost";
+        document.cookie = "book=; expires=" + end_time.toUTCString() + "domain=localhost";
+        document.cookie = "name=Nicholas";
+
+        console.log("end_time--->", end_time.toUTCString());
+        console.log("myCookie--->", document.cookie);
+    </script>
+
+    最好每次设置cookie时都像下面这个例子中一样使用encodeURIComponent()：
+    <script>
+        document.cookie = encodeURIComponent("name") + "=" + encodeURIComponent("Nicholas");
+        // 要给被创建的cookie指定额外信息，只要将参数追加到该字符串，和Set-Cookie头中的格式一样：
+        document.cookie = encodeURIComponent("name") + "=" + encodeURIComponent("Nicholas") + "; domain=.wrox.com; path=/";
+    </script>
+
+
+    由于JavaScript中读写cookie不是非常直观，常常需要写一些函数来简化cookie的功能。
+    基本的cookie操作有三种：读取、写入和删除。
+    他们在 CookieUtil对象中如下表示：
+    <script>
+        var CookieUtil = {
+            get: function(name) {
+                var cookieName = encodeURIComponent(name) + "=",
+                    cookieStart = document.cookie.indexOf(cookieName),
+                    cookieValue = null;
+                
+                if (cookieStart > -1) {
+                    var cookieEnd = document.cookie.indexOf(";", cookieStart);
+                    if (cookieEnd == -1) {
+                        cookieEnd = document.cookie.length;
+                    }
+                    cookieValue = decodeURIComponent(document.cookie.substring(cookieStart + cookieName.length, cookieEnd));
+                }
+                return cookieValue;
+            },
+            set: function(name, value, expires, path, domain, secure) {
+                var cookieText = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+                if (expires instanceof Date) {
+                    cookieText += "; expires=" + expires.toUTCString();
+                }
+                if (path) {
+                    cookieText += "; path=" + path;
+                }
+                if (domain) {
+                    cookieText += "; domain=" + domain;
+                }
+                if (secure) {
+                    cookieText += "; secure";
+                }
+                document.cookie = cookieText;
+            },
+            unset: function(name, path, domain, secure) {
+                this.set(name, "", new Date(0), path, domain, secure);
+            }
+        }
+
+        // 可以像下面这样使用上述方法：
+
+        // 设置cookie
+        CookieUtil.set("book", "Professional JavaScript");
+        // 读取cookie
+        console.log("book--->", CookieUtil.get("book"));
+
+        console.log("myCookie--->", document.cookie);
+        // 删除cookie
+        CookieUtil.unset("book");
+        CookieUtil.unset("name");
+
+        
+        console.log("myCookie--->", document.cookie);
+    </script>
+
+    这些方法通过处理解析、构造cookie字符串的任务令在客户端利用cookie储存数据更加简单。
+
+    -----------------------------------------------------------
+
+    4. 子cookie
+
+    为了绕开浏览器的单域名下的cookie数限制，有了子cookie（subcookie）的概念。
+    子cookie是存放在单个cookie中的更小段的数据，也就是使用cookie值来存储多个名值对。
+    子cookie最常用的格式如下：
+    ------------------------
+    name=name1=value1&name2=value2&name3=value3&name4=value4&name5=value5
+    
+    为了更好地操作子cookie，必须建立一系列新方法。
+    <script>
+        var SubCookieUtil = {
+            get: function(name, subName) {
+                var subCookies = this.getAll(name);
+                if (subCookies) {
+                    return subCookies[subName];
+                } else {
+                    return null;
+                }
+            },
+
+            getAll: function(name) {
+                var cookieName = encodeURIComponent(name) + "=",
+                    cookieStart = document.cookie.indexOf(cookieName),
+                    cookieValue = null,
+                    cookieEnd,
+                    subCookies,
+                    i,
+                    parts,
+                    result = {};
+                
+                if (cookieStart > -1) {
+                    cookieEnd = document.cookie.indexOf(";", cookieStart);
+                    if (cookieEnd == -1) {
+                        cookieEnd = document.cookie.length;
+                    }
+                    cookieValue = document.cookie.substring(cookieStart + cookieName.length, cookieEnd);
+
+                    if (cookieValue.length > 0) {
+                        subCookies = cookieValue.split("&");
+                        for (i = 0, len = subCookies.length; i < len; i++) {
+                            parts = subCookies[i].split("=");
+                            result[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1]);
+                        }
+
+                        return result;
+                    }
+                }
+
+                return null;
+            },
+
+            set: function(name, subName, value, expires, path, domain, secure) {
+                var subCookies = this.getAll(name) || {};
+                subCookies[subName] = value;
+
+                this.setAll(name, subCookies, expires, path, domain, secure);
+            },
+
+            // subCookies是包含所有子cookie的对象
+            setAll: function(name, subCookies, expires, path, domain, secure) {
+                var cookieText = encodeURIComponent(name) + "=",
+                    subCookieParts = new Array(),
+                    subName;
+                for(subName in subCookies) {
+                    if(subName.length > 0 && subCookies.hasOwnProperty(subName)) {
+                        subCookieParts.push(encodeURIComponent(subName) + "=" + encodeURIComponent(subCookies[subName]));
+                    }
+                }
+                if(subCookieParts.length > 0){
+                    cookieText += subCookieParts.join("&");
+                    if (expires instanceof Date) {
+                        cookieText += "; expires=" + expires.toUTCString();
+                    }
+                    if (path) {
+                        cookieText += "; path=" + path;
+                    }
+                    if (domain) {
+                        cookieText += "; domain=" + domain;
+                    }
+                    if (secure) {
+                        cookieText += "; secure";
+                    }
+                } else {
+                    cookieText += "; expires=" + (new Date(0)).toUTCString();
+                }
+
+                document.cookie = cookieText;
+            },
+
+            unset: function(name, subName, expires, path, domain, secure) {
+                var subCookies = this.getAll(name);
+                if (subCookies) {
+                    delete subCookies[subName];
+                    this.setAll(name, subCookies, null, path, domain, secure);
+                }
+            },
+
+            unsetAll: function(name, path, domain, secure) {
+                this.setAll(name, null, new Date(0), path, domain, secure);
+            }
+
+        }
+    </script>
+
+    可以按如下方式使用这些方法：
+    ------------------------
+    假设document.cookie = data=name=Nicholas&book=Professional20%Javascripnt
+
+    <script>
+        // 设置两个cookie
+        SubCookieUtil.set('data', 'name', 'Nicholas');
+        SubCookieUtil.set('data', 'book', 'Professional JavaScript');
+
+        console.log(document.cookie);
+
+        // 设置全部子cookie和失效日期
+        SubCookieUtil.setAll('data', {'name': 'Nicholas', 'book': 'Professional JavaScript'}, new Date("7/9/2017 14:35"));
+
+        // 修改名字的值，并修改失效日期
+        SubCookieUtil.set('data', 'myson', '许一泽', new Date("3/21/2017 16:30"));
+        SubCookieUtil.set('data', 'sweetName', 'UU');
+
+        // 删除一个子cookie
+        SubCookieUtil.unset('data', 'book');
+
+    </script>
+
+    如果你担心开发中可能会达到单域名的cookie上限，那么子cookie可能是一个非常有吸引力的备选方案。
+    不过，你需要更加密切关注cookie的长度，以防超过单个cookie的长度限制。
+
+    -----------------------------------------------------------
+
+    5. 关于cookie的思考
+
+    由于所有的cookie都会由浏览器作为请求头发送，所以在cookie中存储大量信息会影响到特定域的请求性能。
+
+    cookie的性质和它的局限使得其并不能作为存储大量信息的理想手段，所以又出现了其他方法。
+
+    * 一定不要在cookie中存储重要和敏感的数据。cookie数据并非存在于一个安全的环境中，其中包含的任何数据都可以被他人访问。
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+    23.3.2 IE用户数据
+
+    在IE5.0中，微软通过一个自定义行为引入了持久化用户数据的概念。
+    用户数据允许每个文档最多128KB数据，每个域名最多1MB数据。
+
+    要使用持久化用户数据，首先必须如下所示，使用CSS在某个元素上指定userData行为：
+    <div id="dataStore" style="behavior: url(#default#userData)"></div>
+
+    一旦该元素使用了userData行为，那么就可以使用setAttribute()方法在上面保存数据了。
+    为了将数据提交到浏览器缓存中，还必须调用save()方法并告诉它要保存到的数据空间的名字。数据空间名字可以完全任意，仅用于区分不同的数据集。
+
+    下一次载入页面之后，可以使用load()方法指定同样的数据空间名称来获取数据。
+
+    <script>
+        // 用户数据存储
+        // var dataStore = document.getElementById("dataStore");
+        // dataStore.setAttribute("name", "Si Meiyu");
+        // dataStore.setAttribute("age", "18");
+        // dataStore.save("BookInfo");  // edge报错：object不支持save方法
+
+        // 获取数据
+        // dataStore.load("BookInfo"); 
+
+        // alert("My name is " + dataStore.getAttribute("name"));
+
+    </script>
+
+    用户数据默认是可以跨域会话持久存在的，同时也不会过期；数据需要通过removeAttribute()方法专门进行删除以释放空间。
+
+    * 和cookie一样，IE用户数据并非安全的，所以不能存放敏感信息。
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+    23.3.3 Web存储机制
+
+    Web Storage 最早是在Web超文本应用技术工作组（WHAT-WG）的Web应用1.0规范中描述的。这个规范的最初的工作最终成为了HTML5的一部分。
+    当数据需要被严格控制在客户端时，无需持续的将数据发回服务器。
+
+    Web Storage 的两个主要目标是：
+    · 提供一种在cookie之外存储会话数据的途径。
+    · 提供一种存储大量可以跨会话存在的数据的机制。
+
+    最初的 Web Storage 规范包含了两种对象定义：
+    sessionStorage 和 globalStorage。
+    这两个对象在支持的浏览器中都是以window对象属性的形式存在的。
+
+    ------------------------
+    1. Storage类型
+
+    Storage类型提供最大的存储空间（因浏览器而异）来存储名值对。
+    Storage的实例与其他对象相似，有如下方法：
+    · clear()：删除所有值。
+    · getItem(name)：根据指定的名字name获取对应的值。
+    · key(index)：获取index位置处的值的名字。
+    · removeItem(name)：删除由name指定的名值对。
+    · setItem(name, value)：为指定的name设置一个对应的值。
+
+    * Storage类型只能存储字符串。非字符串的数据在存储之前会被转换成字符串。
+
+    ------------------------
+    2. sessionStorage 对象
+
+    1) sessionStorage对象是Storage的一个实例。可以使用setItem()或者直接设置新的属性来存储数据。
+    2) sessionStorage对象绑定于某个服务器会话，所以当文件在本地运行的时候是不可用的。
+    3) 存储在sessionStorage中的数据只能由最初给对象存储数据的页面访问到，所以对多页面应用有限制。
+    4) sessionStorage对象存储特定于某个会话的数据，也就是该数据只保持到浏览器关闭。
+
+    <script>
+        // 使用方法存储数据
+        sessionStorage.setItem("system", "Windows 10 +");
+        // 使用属性存储数据
+        sessionStorage.brand = "lenovo";
+
+        // 使用方法读取数据
+        var system = sessionStorage.getItem("system");
+        // 使用属性读取数据
+        var system = sessionStorage.system;
+
+        console.log("system--->", system);
+    </script>
+
+    还可以通过length属性和key方法迭代sessionStorage中的值：
+    <script>
+        for (var i = 0, len = sessionStorage.length; i < len; i++) {
+            var key = sessionStorage.key(i);
+            var value = sessionStorage.getItem(key);
+            console.log(key + "=" + value);
+        }
+    </script>
+    
+    要从sessionStorage中删除数据，可以使用delete操作符删除对象属性，也可以调用removeItem()方法。
+    <script>
+        // 使用delete删除一个值，在webkit中无效
+        delete sessionStorage.brand;
+
+        // 使用方法删除一个值
+        sessionStorage.removeItem("system");
+
+    </script>
+
+    sessionStorage对象应该主要用于仅针对会话的小段数据的存储。
+    如果需要跨越会话存储数据，那么 globalStorage 或 localStorage 更为合适。
+
+    -------------------------------
+
+    3. globalStorage
+
+    globalStorage对象跨越会话存储数据，但有特定的访问限制
+    要使用globalStorage，首先要指定哪些域可以访问该数据。可以通过方括号标记使用属性来实现：
+    <script>
+        // 保存数据
+        // globalStorage[location.host].firm = "chinac";
+
+        // 获取数据
+        // var firm = globalStorage[location.host].firm;
+
+        // console.log("globalStorage--->", firm);
+
+    </script>
+    报错：globalStorage is not defined.
+
+    ------------------------
+
+    4. localStorage 对象
+
+    localStorage 对象在修订过的HTML5规范中作为持久保存客户端数据的方案取代了globalStorage。
+    与globalStorage不同，不能给localStorage对象指定任何访问规则；规则事先就设定好了。
+
+    要访问同一个localStorage对象，页面必须来自同一个域名（子域名无效），使用同一种协议，在同一个端口上。
+
+    由于localStorage是Storage的实例，所以可以像使用sessionStorage一样来使用它。
+    <script>
+        // 使用方法存储数据
+        localStorage.setItem("name", "Si Meiyu");
+        // 使用属性存储数据
+        localStorage.age = "18";
+        // 使用方法读取数据
+        var name = localStorage.getItem("name");
+        // 使用属性读取数据
+        var age = localStorage.age;
+
+        console.log("localStorage---> name is " + name + "; age is " + age);
+    </script>
+
+    存储在localStorage中的数据保留到通过JavaScript删除或者用户清除浏览器缓存。
+
+    为了兼容只支持globalStorage的浏览器，可以使用以下函数：
+    <script>
+        function getLocalStorage() {
+            if (typeof localStorage == "object") {
+                return localStorage;
+            } else if (typeof globalStorage == "object") {
+                return globalStorage[location.host];
+            } else {
+                throw new Error("Local Storage is not available!");
+            }
+        }
+
+        // 调用函数读写数据
+        var storage = getLocalStorage();
+
+        storage.setItem("try", "getLocalStorage");
+
+        console.log("getLocalStorage--->", storage.try);
+    </script>
+    在确定了使用哪个Storage对象之后，就能在所有支持Web Storage的浏览器中使用相同的数据存取规则操作数据了。
+
+    -------------------------------
+
+    5. storage 事件
+
+    对Storage对象进行任何修改，都会在文档上触发storage事件。
+    当通过属性或setItem()方法保存数据，使用delete操作符或removeItem()方法删除数据，或者调用clear()方法时，都会发生该事件。
+
+    这个事件的event对象有以下属性：
+    · domain：发生变化的存储空间的域名；
+    · key：设置或删除的域名；
+    · newValue：如果是设置值，则是新值；如果是删除键，则是null；
+    · oldValue：键被更改之前的值。
+
+    Webkit不支持storage事件。
+
+    <script>
+        document.addEventListener("storage", function(event){
+            console.log("storage event domain: ", event.domain);
+            console.log("storage event key: ", event.key);
+            console.log("storage event newValue: ", event.newValue);
+            console.log("storage event oldValue: ", event.oldValue);
+        });
+
+        localStorage.setItem("event", "storage");
+    </script>
+
+    * 好像并不好用嘛···
+
+    ------------------------
+
+    6. 限制
+
+    一般来说，对存储空间大小的限制都是以每个来源（协议、域和端口）为单位的。
+    对localStorage而言，大多数浏览器会设置每个来源5MB的限制。Chrome和Safari对每个来源的限制是2.5MB。IOS版Safari和Android版Webkit的限制也是2.5MB。
+    对sessionStorage的限制也因浏览器而异。有的浏览器对sessionStorage的大小没有限制。
+    Chrome、Safari、iOS版Safari和Android版Webkit的限制都是2.5MB。IE8+和Opera对sessionStorage大小的限制是5MB。
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+    23.3.4  IndexedDB
+
+    IndexedDB，即 Indexed DataBase API，是在浏览器中保存结构化数据的一种数据库。
+    IndexedDB的思想是创建一套API，方便保存和读取JavaScript对象，同时还支持查询和搜索。
+
+    在得到完整支持的情况下，IndexedDB将是一个作为API宿主的全局对象。浏览器使用供应商前缀。
+    <script>
+        var indexedDB = window.indexedDB || window.msIndexedDB || window.mozIndexedDB || window.webkitIndexedDB;
+    </script>
+
+    ------------------------
+
+    1. 数据库
+
+    IndexedDB就是一个数据库。IndexedDB使用对象保存数据，一个IndexedDB数据库就是一组位于相同命名空间下的对象的集合。
+
+    使用IndexedDB的第一步是打开它，即把要打开的数据库名传给indexedDB.open()。
+    如果传入的数据库已经存在，就会发送一个打开它的请求。
+    如果传入的数据库还不存在，就会发送一个创建并打开它的请求。
+    总之，调用indexedDB.open()会返回一个IDBRequest对象，在这个对象上可以添加 onerror 和 onsuccess 事件处理程序。
+    <script>
+        var request, database;
+        request = indexedDB.open("admin");
+        request.onerror = function(event){
+            console.log("Something bad happened while trying to open: ", event.target.errorCode);
+        };
+        request.onsuccess = function(event){
+            database = event.target.result;
+        }
+    </script>
+    在这两个事件处理程序中，event.target都指向request对象。
+    如果响应的是onsuccess事件处理程序，那么，event.target.result中将有一个数据库实例对象（IDBDatabase），这个对象会保存在database变量中。
+    如果发生了错误，那么event.target.errorCode中将保存一个错误码，表示问题的性质。
+
+    默认情况下，IndexedDB数据库是没有版本号的，最好一开始就为数据库指定一个版本号。
+    为此，可以调用 setVersion()方法，传入以字符串形式表示的版本号。
+    同样，调用这个方法也会返回一个请求对象，需要你再指定事件处理程序。
+    <script>
+        if (database.version != "1.0") {
+            request = database.setVersion("1.0");
+            request.onerror = function(event) {
+                console.log("Something bad had happened while trying to set version: ", event.target.errorCode);
+            }
+            request.onsuccess = function(event) {
+                console.log("Database initialization complete. Database name: ", database.name, "; Version: ", database.version);
+            }
+        } else {
+            console.log("Database already initialized. Database name: ", database.name, "Version: ", database.version);
+        }
+    </script>
+    在整个Web应用中，随着对数据库结构的更新和修改，可能会产生很多个不同版本的数据库。    
+
+    ------------------------
+
+    2. 对象存储空间
+
+    在建立了与数据库的连接之后，下一步就是使用对象存储空间。
+    如果数据库的版本与你传入的版本不匹配，那可能就需要创建一个新的对象存储空间。
+    * 在创建对象存储空间之前，必须要想清楚你想要保存什么数据类型。
+    <script>
+        var user = {
+            username: "007",
+            firstName: "James",
+            lastName: "Bond",
+            password: "foo"
+        }
+        // 创建对象存储空间时，必须指定对象存储空间的键。指定的存储空间的键必须全局唯一。
+        var store = database.createObjectStore("users", {keyPath: "username"});
+        // 第二个参数中的keyPath属性，就是空间中将要保存的对象的一个属性，而这个属性将作为存储空间的键来使用。
+    </script>
+    有了对存储空间的引用后，可以使用add()或put()方法向其中添加数据。
+    这个方法都接收一个参数，即要保存的对象，然后这个对象就会被保存到存储空间中。
+    这两个方法的区别在空间中已经包含键值相同的对象时会体现出来。在这种情况下，add()会返回错误，而put()则会重写原有对象。
+    add()方法，插入新值。
+    put()方法，更新原有的值。
+
+    每次调用add() 或put()都会创建一个新的针对这个对象存储空间的更新请求。
+    如果想验证更新请求是否成功完成，可以把返回的请求对象保存在一个变量中，然后在指定onerror或onsuccess事件处理程序。
+    <script>
+        // users中保存着一批用户对象
+        var i = 0,
+            request,
+            requests = [],
+            len = users.length;
+        while (i < len) {
+            request = store.add(users[i++]);
+            request.onerror = function (event) {
+                // 处理错误
+            };
+            request.onsuccess = function (event) {
+                // 处理成功
+            }
+            requests.push(request);
+        }
+    </script>
+
+    ------------------------
+
+    3. 事务
+
+    跨过创建对象存储空间这一步后，接下来的所有操作都是通过事务来完成的。
+
+    在数据库对象上调用 transaction() 方法可以创建事务。
+    任何时候，只要想读取或修改数据，都要通过事务来组织所有操作。
+
+    最简单的创建事务：
+    var transaction = db.transaction();
+
+    传入一个或多个要访问的存储空间：
+    var transaction = db.transaction("users");
+    这样可以保证只加载users存储空间中的数据。
+
+    访问多个对象存储空间：
+    var transaction = db.transaction(["users", "anotherStore"]);
+
+    上面这些方法都是以只读方式访问数据。
+    要修改访问方式，必须在创建事务时传入第二个参数，这个参数表示访问模式。用IDBTransaction接口定义的如下常量表示：
+    · READ_ONLY(0)，表示只读。
+    · READ_WRITE(1)，表示读写。
+    · VERSION_CHANGE(2)，表示改变。
+    IE10+和Firefox4+实现的是 IDBTransaction，但Chrome中则叫webkitIDBTransaction，所以使用下面的代码可以统一接口：
+    <script>
+
+        var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
+
+        // 为transaction()指定第二个参数
+        var transaction = database.transaction("users", IDBTransaction.READ_WRITE);
+        // 这个事务能够读写users的存储空间
+
+    </script>
+
+    取得了事务的索引后，使用objectStore()方法并传入存储空间的名称，就可以访问特定的存储空间。
+    然后就可以像以前一样使用add()和put()方法，使用get()可以取得值，delete()可以删除对象，使用clear()可以删除所有对象。
+    get() 和 delete() 方法都接收一个对象键作为参数。
+    所有这五个方法都会返回一个新的请求对象。
+    <script>
+        var request = database.transaction("users").objectStore("users").get("007");
+        request.onerror = function(event) {
+            console.log("Dit not get the object!");
+        };
+        request.onsuccess = function(event) {
+            var result = event.target.result;
+            console.log(result.firstName); // James
+        }
+    </script>
+
+    因为一个事务可以完成任何多个请求，所以事务对象本身也有事件处理程序：onerror 和 oncomplete。
+    这两个事件可以提供事务级的状态信息。
+    <script>
+        transaction.onerror = function(event) {
+            // 整个事务都被取消了
+        };
+        transaction.oncomplete = function(event) {
+            // 整个事务都成功完成了
+        };
+    </script>
+    通过oncomplete事件的事件对象event访问不到get()请求返回的任何数据。必须在相应请求的onsuccess事件处理程序中才能访问到数据。
+
+    ------------------------
+
+    4. 使用游标查询
+
+    5. 键范围
+
+    6. 设定游标方向
+
+    7. 索引
+
+    8. 并发问题
+
+    9. 限制
+    
+
+    ------------------------  
+    <script>
+        function func_database () {
+
+            var indexedDB = window.indexedDB || window.msIndexedDB || window.mozIndexedDB || window.webkitIndexedDB,
+                IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction,
+                request,
+                store,
+                database,
+                users = [
+                    {
+                        username: "007",
+                        firstName: "James",
+                        lastName: "Bond",
+                        password: "foo"
+                    },
+                    {
+                        username: "ace",
+                        firstName: "John",
+                        lastName: "Smith",
+                        password: "bar"
+                    }                
+                ];
+
+            // 创建数据库
+            request = indexedDB.open("admin");
+            request.onerror = function (event) {
+                alert("Something bad happened while trying to open: " + event.target.errorCode);
+            };
+            request.onsuccess = function (event) {
+                database = event.target.result;
+                initializeDatabase();
+            }
+
+            function initializeDatabase () {
+                if (database.version != "1.0") {
+                    request = database.setVersion("1.0");
+                    request.onerror = function (event) {
+                        alert("Something bad happened while trying to set version: " + event.target.errorCode);
+                    }
+                    request.onsuccess = function (event) {
+                        // 创建对象存储空间
+                        store = database.createObjectStore("users", {keyPath: "username"});                        
+                        // 向新创建的对象存储空间添加数据
+                        users.forEach(function(user){
+                            store.add(user);
+                        });
+
+                        outputValues();
+                    }
+                } else {
+                    outputValues();
+                }
+            }
+
+            // 事务
+            function outputValues () {
+
+            }
+        }
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>元素遍历-DOM扩展</title>
+</head>
+<body>
+对于元素间的空格，IE9之前的浏览器不会返回文本节点，而其他浏览器都会返回文本节点。
+<div class="myDiv">
+	<p>第一个Element类型的子节点</p>
+	<p>第二个Element类型的子节点</p>
+	<p>第三个Element类型的子节点</p>
+</div>
+<script type="text/javascript">
+	var myDiv = document.querySelector(".myDiv");
+	console.log("myDiv的子节点数量："+myDiv.childNodes.length);  // 7
+	console.log("myDiv的第一个子节点名称："+myDiv.firstChild.nodeName);  // #text
+	for (var i = 0; i < myDiv.childNodes.length; i++) {
+		console.log(myDiv.childNodes[i].nodeType + "、" + myDiv.childNodes[i].nodeName);  // 三个Element类型节点，四个Text类型节点
+	}
+</script>
+childNodes属性和firstChild属性返回的结果与想要遍历的元素不一致。
+为弥补这一差异而又保持DOM规范不变，Element Traversal 规范新定义了一组属性。
+Element Traversal API 为DOM添加了以下5个属性：
+· childElementCount：返回子元素（不包括文本节点和注释）的个数；
+· firstElementChild：指向第一个子元素。firstChild的元素版。
+· lastElementChild：指向最后一个子元素。lastChild的元素版。
+· previousElementSibling：指向前一个同辈元素。previousSibling的元素版。
+· nextElementSibling：指向后一个同辈元素。nextSibling的元素版。
+支持Element Traversal规范的浏览器有IE9+、Firefox3.5+、Safari4+、Chrome和Opera10+。
+<script type="text/javascript">
+	console.log(myDiv.childElementCount);
+	console.log(myDiv.firstElementChild.firstChild.nodeValue);
+</script>
+
+
+
+</body>
+</html> 

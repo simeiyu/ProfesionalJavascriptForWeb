@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>执行环境及作用域-变量、作用域和内存问题-JavaScript高级程序设计</title>
+</head>
+<body>
+执行环境（环境）、变量对象、作用域、作用域链
+
+环境中定义的所有变量和函数都保存在变量对象中。
+
+<script type="text/javascript">
+	var color = "bule";
+	function changeColor() {
+		var anotherColor = "red";
+		function swapColors() {
+			var tempColor = color;
+			color = anotherColor;
+			anotherColor = tempColor;
+		}
+		swapColors();
+	}
+	changeColor();
+</script>
+
+<hr>
+4.2.1 延长作用域链
+try-catch语句的catch块
+with语句
+
+4.2.2 没有块级作用域
+1.声明变量
+2.查询标识符
+当在某个环境中为了读取或写入而引用一个标识符时，必须通过搜索来确定该标识符实际代表什么。搜索从作用域链的前端开始，向上逐级查询与给定名字匹配的标识符。如果在局部环境中找到了该标识符，搜索过程停止，变量就绪。如果在局部环境中没有找到该标识符，则继续沿作用域链向上搜索，搜索过程将一直追溯到全局环境的变量对象。如果在全局环境也没有找到该标识符，则意味着该变量未声明。
+
+
+<script type="text/javascript">
+	// 解除引用
+	function createPerson(name) {
+		var localPerson = new Object();
+		localPerson.name = name;
+		return localPerson;
+	}
+	var globalPerson = createPerson("Nicholas");
+	console.log(globalPerson.name);
+	globalPerson = null;
+</script>
+</body>
+</html>

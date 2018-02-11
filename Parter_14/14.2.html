@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>文本框脚本 - 表单脚本</title>
+</head>
+<body>
+<fieldset>
+	<legend>文本框</legend>
+	<form name="form1" action="#" method="post" novalidate>
+		<div style="margin-bottom: 10px;">
+			<label for="name" autofocus>姓名：</label>
+			<input type="text" name="name" value="小甜甜" size="3" maxlength="5">
+		</div>
+		<div>
+			<label for="description" style="vertical-align: top;">描述：</label>
+			<textarea rows="5" cols="62" name="description">这是一个可爱的小姑娘！</textarea>
+		</div>
+		<hr>
+		<input type="submit" name="submit" value="提交">
+	</form>
+</fieldset>
+<hr>
+<script type="text/javascript">
+	var form1 = document.forms[0];
+	form1.addEventListener("submit", function(event){
+		// 阻止submit默认行为
+		event.preventDefault();
+
+		// 禁止多次点击提交按钮
+		var btn_submit = event.target.elements["submit"];
+		btn_submit.disabled = true;
+
+		// 打印出input和textarea的值
+		var inputV = event.target.elements["name"].value;
+		var textV = event.target.elements["description"].value;
+		console.log("姓名：" + inputV);
+		console.log("描述：" + textV);
+	}, false);
+
+	// 表单第一个字段获得焦点
+	window.addEventListener("load", function(event){
+		var element = document.forms[0].elements["name"];
+		if (element.autofocus !== true) {
+			element.focus(); 
+		}
+	}, false);
+</script>
+
+
+14.2.1 选择文本
+input和textarea文本框都支持select()方法，这个方法用于选择文本框中的所有文本，不接受参数，可以在任何时候被调用。
+在文本框获得焦点时选择其所有文本，可以让用户不必一个一个的删除文本。
+<script type="text/javascript">
+	var myName = document.forms[0].elements[0];
+	var description = document.forms[0].elements[1];
+	myName.addEventListener("focus", getSelect, false);
+	description.addEventListener("focus", getSelect, false);
+	function getSelect () {
+		var target = event.target;
+		target.select();
+	}
+</script>
+1、选择(select)事件
+在选择了文本框中的文本时，就会触发select事件。调用select()方法或鼠标选择文本都可以触发select事件。
+<script type="text/javascript">
+	myName.addEventListener("select", beSelected, false);
+	description.addEventListener("select", beSelected, false);
+
+	function beSelected(){
+		var target = event.target;
+		var valueTxt = target.value;
+		// console.log(valueTxt);
+		console.log(getSelectedText(target));
+	}
+</script>
+
+2、取得选择的文本
+HTML5扩展了属性selectionStart和selectionEnd；这两个属性中保存的是基于0的数值。表示所选择文本的范围。
+IE9+、Firefox、Safari、Chrome、Opera都支持这两个属性。
+IE8及更早版本中有一个document.selection对象，其中保存着用户在整个文档范围内选择的文本信息。要取得选中的文本，首先必须创建一个范围，然后再将文本从其中提取出来。
+(12章 12.4 范围。)
+<script type="text/javascript">
+	function getSelectedText(textBox){
+		if (typeof textBox.selectionStart == "number") {
+			return textBox.value.substring(textBox.selectionStart, textBox.selectionEnd);
+		} else if (document.selection) {
+			// 调用document.selection时不需要考虑textBox参数
+			return document.selection.createRange().text;
+		}
+	}
+</script>
+
+3、选择部分文本
+除了select()方法之外，所有文本框都有一个setSelectionRange()方法。
+setSelectionRange()方法接受两个参数：
+要选择的第一个字符的索引、要选择的最后一个字符之后的字符的索引（类似于substring()方法的两个参数）。
+<script type="text/javascript">
+	// select()与setSelectionRange()只用一个，无师自通
+	// description.setSelectionRange(0, 5);
+</script>
+<hr>
+IE8及更早版本支持使用范围选择部分文本：
+<div style="padding: 30px; border: 1px dashed #ddd;"><input type="text" name="rangeTxt"></div>
+<!-- <script type="text/javascript">
+	var rangeTxt = document.getElementsByName("rangeTxt")[0];
+	// 设置文本框的值
+	rangeTxt.value = "Hello World!";
+	// 创建范围
+	var range = rangeTxt.createTextRange();
+	// 使用collapse()将范围折叠到文本框的开始位置
+	range.collapse(true);
+	// 将范围移动到位
+	range.moveStart("character", 0);
+	range.moveEnd("character", rangeTxt.value.length);
+	// 使用范围的select()方法选择文本
+	range.select();
+	// 想要在文本框中看到文本被选择的结果，必须让文本框获得焦点
+	rangeTxt.focus();
+</script> -->
+跨浏览器方案：
+<script type="text/javascript">
+	function selectText(textbox, startIndex, endIndex) {
+		if (textbox.setSelectionRange) {
+			textbox.setSelectionRange(startIndex, endIndex);
+		} else if (textbox.creatTextRange) {
+			var range = textbox.creatTextRange();
+			range.collapse(true);
+			range.moveStart("character", startIndex);
+			range.moveEnd("character", endIndex);
+			range.select();
+		}
+		console.log("000");
+	}
+	var myTarget = document.getElementsByName("rangeTxt")[0];
+	myTarget.value = "Hello World!";
+	myTarget.addEventListener("focus", function(event){
+		var target = event.target;
+		selectText(target, 0, 3);
+	}, false);
+</script>
+
+
+14.2.2 过滤输入
+1、屏蔽字符
+<script type="text/javascript">
+	myTarget.addEventListener("keypress", function(event){
+		var charCode = event.charCode;  // 取得字符编码
+		var str = String.fromCharCode(charCode);  // 将字符编码转换为字符串
+		// 使用正则表达式测试字符串，确定字符串不是数值
+		if (!/\d/.test(str) && charCode > 9 && !event.ctrlKey) {
+			event.preventDefault();
+		}
+	})
+</script>
+2、操作剪贴板
+
+<hr>
+14.2.2 自动切换焦点
+<fieldset>
+	<legend>自动切换焦点</legend>
+	<form id="form2">
+		<div style="margin-bottom: 10px;">
+			<label for="username">用户名：</label>
+			<input type="text" name="username" maxlength="8">
+		</div>
+		<div style="margin-bottom: 10px;">
+			<label for="fname">姓名：</label>
+			<input type="text" name="fname" maxlength="4">
+		</div>
+		<div style="margin-bottom: 10px;">
+			<label for="password">密码：</label>
+			<input type="password" name="password" maxlength="6">
+		</div>
+		<div style="margin-bottom: 10px;">
+			<label for="card">证件：</label>
+			<select name="card">
+				<option value="0">身份证</option>
+				<option value="1">社保卡</option>
+				<option value="2">驾驶证</option>
+				<option value="3">回乡证</option>
+			</select>
+		</div>
+		<div>
+			<input type="submit" name="btn_submit">
+		</div>		
+	</form>
+</fieldset>
+<script type="text/javascript">
+	(function(){
+		function tabForward(event) {
+			var target = event.target;
+			if (target.value.length == target.maxLength) {  // 注意maxLenght的大小写
+				var form = target.form;
+				for (var i = 0; i < form.elements.length; i++) {
+					if (form.elements[i] == target) {
+						if (form.elements[i+1]) {
+							form.elements[i+1].focus();
+						}
+						return;
+					}
+				}
+			}
+		}
+		var textbox1 = document.forms["form2"].elements["username"];
+		var textbox2 = document.forms["form2"].elements["fname"];
+		var textbox3 = document.forms["form2"].elements["password"];
+		var selectbox1 = document.forms["form2"].elements["card"];
+		textbox1.addEventListener("keyup", tabForward);
+		textbox2.addEventListener("keyup", tabForward);
+		textbox3.addEventListener("keyup", tabForward);
+		selectbox1.addEventListener("change", function(event){
+			var target = event.target;
+			var form = target.form;
+			for (var i = 0; i < form.elements.length; i++) {
+				if (form.elements[i] == target) {
+					if (form.elements[i+1]) {
+						form.elements[i+1].focus();
+					}
+					return;
+				}
+			}
+		});
+	})();
+</script>
+
+
+14.2.4 HTML5约束验证API
+HTML5新增了一些功能，可以在表单提交到服务器之前验证数据，即便JavaScript被禁用或未能加载，也可以确保基本的验证。
+1、必填字段
+表单字段中指定required属性；这个属性适用于input、textarea和select字段。
+任何标注有required的字段，在提交表单时都不能空着。
+在JavaScript中，通过对应的required属性，可以检查某个表单字段是否为必填字段。
+2、其他输入类型
+HTML5为input的type属性增加了几个值：email、url是得到支持最多 类型。
+3、数值范围
+number、range、datetime、datetime-local、date、week、month、time
+4、输入模式
+HTML5为文本字段新增了pattern属性。这个属性的值是一个正则表达式，用于匹配文本框中的值。
+如果只想允许在文本字段中输入数值。
+<form name="pattern">
+	<!-- 可以输入任何内容，但如果不符合提交时会提示 -->
+	<input type="text" name="count" pattern="d+">
+	<input type="submit" name="" value="提交">  
+</form>
+使用以下代码可以检测浏览器是否支持pattern属性：
+<script type="text/javascript">
+	var isPatternSupported = "pattern" in document.createElement("input");
+
+	console.log(isPatternSupported);
+</script>
+5、检测有效性
+ checkValidity()方法可以检测表单中的某个字段是否有效，如果字段值有效则返回true，无效返回false。
+ 必填字段没有值就是无效的，字段中的值与pattern属性不符也是无效的。
+ <script type="text/javascript">
+ 	if (document.forms[0].elements[0].checkValidity()) {
+ 		console.log("有效！");
+ 	} else {
+ 		console.log("无效！");
+ 	}
+ </script>
+ 要检测整个表单是否有效，可以在表单自身调用checkValidity()方法。如果所有表单字段都有效，这个方法返回true，即使有一个字段无效，这个方法也会返回false。
+ ---
+ validity属性表示字段为什么有效或无效。这个对象包含一系列属性，每个属性都会返回一个布尔值。
+ ……
+ 6、禁用验证
+ 通过设置novalidate属性，可以告诉表单不进行验证。
+ 如果一个表单中有多个提交按钮，为了指定点击某个提交按钮不必验证表单，可以在相应按钮上添加formnovalidate属性。
+ 在JavaScript中使用noValidate属性可以取得或设置这个值。formnovalidate也是如此。
+ <script type="text/javascript">
+ 	var valiDate = document.forms[0].noValidate;
+ 	console.log(valiDate);
+ 	valiDate = false;  
+ </script>
+
+
+</body>
+</html>  

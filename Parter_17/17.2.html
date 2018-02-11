@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>17.2 错误处理 - 错误处理与调试</title>
+</head>
+<body>
+
+    17.2.1 try-catch 语句
+    ----------------------------------------------------------------------------------------------------------
+
+    ECMA-262 第3版引入了try-catch语句，作为JavaScript中处理异常的一种标准方式。
+    基本语法如下：
+    <script>
+        try {
+            // 可能导致错误的代码
+        } catch (error) {
+            alert("An error happened!");
+        }
+    </script>
+    我们应该把所有可能会抛出错误的代码都放在try语句块中，而把那些用于错误处理的代码放在catch块中。
+    如果try块中的任何代码发生了错误，就会立即退出代码执行过程，然后接着执行catch块。
+    此时，catch块会接收到一个包含错误信息的对象。
+    这个对象中包含的实际信息因浏览器而异，但都有一个保存消息的message属性。还有一个保存错误类型的name属性。
+    <script>
+        try {
+            window.hasAFunction();
+        } catch (error) {
+            console.log("error message --->", error.message);  // window.hasAFunction is not a function
+            console.log("error name --->", error.name);  // TypeError
+        }
+    </script>
+
+    ---------------------------------------
+    1. finally 子句
+    finally子句在try-catch语句中是可选的。
+    如果语句中包含了finally子句，那么无论try或catch语句块中包含什么代码——甚至return语句，都不会阻止finally子句的执行。
+    <script>
+        function testFunction() {
+            try {
+                return 2;
+            } catch (error) {
+                return 1;
+            } finally {
+                return 0;
+            }
+        }
+
+        console.log("testFunction ---->", testFunction());  // 0
+    </script>
+
+    ---------------------------------------
+    2. 错误类型
+    每种错误都有对应的错误类型，当错误发生时，就会抛出相应类型的错误对象。
+    ECMA-262定义了下列7种错误类型：
+    · Error：基类型，其他错误都继承自该类型。
+    · EvalError：在使用eval()函数而发生异常时被抛出。
+    · RangeError：在数值超出相应范围时触发。
+    · ReferenceError：在访问不存在的变量时触发。
+    · SyntaxError：当我们把语法错误的JavaScript字符串传入eval()函数时，会导致此类错误。
+    · TypeError：执行特定于类型的操作时，变量的类型不符合要求时触发。
+    · URIError：使用encodeURI()或decodeURI()，而ＵＲＩ格式不正确时触发。
+    要知道错误类型，可以在catch语句中使用instanceof操作符。
+    <script>
+        try {
+            somFunction();
+        } catch (error) {
+            if (error instanceof TypeError) {
+                // 处理类型错误
+                console.log("错误类型：TypeError");
+            } else if (error instanceof ReferenceError) {
+                // 处理引用错误
+                console.log("错误类型：ReferenceError");
+            } else {
+                // 处理其他类型的错误
+            }
+        }
+    </script>
+
+
+
+    17.2.2 抛出错误
+    ----------------------------------------------------------------------------------------------------------
+
+    与try-catch语句相配的还有一个throw操作符，用于随时抛出自定义错误。
+    抛出错误时，必须给throw操作符指定一个值。对这个值的类型，没有要求。
+    <script>
+        // 以下代码都是有效的
+        throw 12345;
+        throw "Hello World!";
+        throw true;
+        throw {name: "JavaScript"};
+    </script>
+    在遇到throw操作符时，代码会立即停止执行。
+    仅当有try-catch语句捕获到被抛出的值时，代码才会继续执行。
+
+    通过使用某种内置错误类型，可以更真实地模拟浏览器错误。
+    每种错误类型的构造函数接收一个参数，即实际的错误消息。
+    创建自定义错误消息时，最常用的错误类型是Error、RangeError、ReferenceError和TypeError。
+    <script>
+        throw new Error("Something bad happened.");
+    </script>
+
+    ---------------------------------------
+    1. 抛出错误的时机
+    <script>
+        function process(values) {
+            if (!(values instanceof Array)) {
+                throw new Error("process(): Argument must be an array!");
+            }
+
+            values.sort();
+            for (var i = 0, len = values.length; i < len; i++) {
+                if (values[i] > 100) {
+                    return values[i];
+                }
+            }
+
+            return -1;
+        }
+
+        process("我是一个粉刷匠");
+    </script>
+    在开发JavaScript代码的过程中，重点关注函数和可能导致函数执行失败的因素。
+    良好的错误处理机制应该可以确保代码中只发生你自己抛出的错误。
+
+    ---------------------------------------
+    2. 抛出错误与使用try-catch
+
+    何时该抛出错误？何时该使用try-catch来捕获他们？
+    我们认为只应该捕获那些你确切地知道该如何处理的错误。
+
+    捕获错误的目的在于避免浏览器以默认的方式处理他们；
+    而抛出错误的目的在于提供错误发生具体原因的消息。
+
+
+
+    17.2.3 错误（error）事件
+    ----------------------------------------------------------------------------------------------------------
+    
+    任何没有通过try-catch处理的错误都会触发window对象的error事件。
+    在任何Web浏览器中，onerror事件处理程序都不会创建event对象，但它可以接受3个参数：
+    错误消息、错误所在的URL和行号。
+
+    要指定onerror事件处理程序，必须使用如下所示的DOM0级技术，他没有遵循"DOM2级事件"的标准格式。
+    <script>
+        window.onerror = function (message, url, line) {
+            alert(message);
+        };
+    </script>
+
+
+</body>
+</html>

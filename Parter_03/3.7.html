@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>函数-基本概念-JavaScript高级程序设计</title>
+</head>
+<body>
+ECMAScript中的函数使用function关键字来声明，后跟一组参数及函数体。
+函数可以通过函数名来调用，后跟一对圆括号和参数。
+return语句实现返回值。
+函数在执行完return语句后停止并立即退出。
+<script type="text/javascript">
+	diff(5, 7);
+	console.log("------------");
+	function diff(num1, num2) {
+		if (num1 < num2) {
+			console.log(num2 - num1);
+		} else {
+			console.log(num1 - num2)
+		}
+	}
+</script>
+
+3.7.1 理解参数
+<script type="text/javascript">
+	function argum() {
+		console.log(arguments.length);
+		console.log(arguments[0]);
+		console.log(arguments[arguments.length - 1]);
+	}
+	argum(1, 5, 8);
+	console.log("------------");
+</script>
+
+3.7.2 没有重载
+如果在ECMAScript中定义了两个名字相同的函数，则该名字只属于后定义的函数。
+<script type="text/javascript">
+	function addsomenumber(num) {
+		return num + 100;
+	}
+	function addsomenumber(num) {
+		return num + 200;
+	}
+	var result = addsomenumber(50);
+	console.log(result);
+</script>
+
+
+
+</body>
+</html>

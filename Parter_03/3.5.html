@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>操作符-基本概念-JavaScript高级程序设计</title>
+</head>
+<body>
+3.5.1 一元操作符
+1.递增递减
+执行前置递增或前置递减操作时，变量的值都是在语句被求值以前改变的。
+<script type="text/javascript">
+	var age = 29;
+	console.log(++age);
+	console.log(age);
+
+	var year = 2016;
+	console.log(--year);
+	console.log(year);
+	console.log("---------");
+</script>
+后置递增或后置递减操作是在包含它们的语句被求值之后才执行的。
+<script type="text/javascript">
+	var age2 = 29;	
+	console.log(age2++);
+	console.log(age2);
+
+	var year2 = 2016;
+	console.log(year2--);
+	console.log(year2);
+</script>
+前置递增递减和后置递增递减这四个操作符对任何值都适用，不仅适用于整数，还适用于字符串、布尔值、浮点数值和对象。
+在应用于不同的值时，递增和递减操作符遵循的规则。
+<script type="text/javascript">
+	var s1 = "01",
+		s2 = "1.1",
+		s3 = "z",
+		f = 1.1,
+		b = false,
+		o = {
+			valueOf: function () {
+				return -1;
+			}
+		};
+
+		s1++;
+		s2++;
+		s3++;
+		b++;
+		f++;
+		o++;
+
+		console.log(s1 + "\n" + s2 + "\n" + s3 + "\n" + b + "\n" + f + "\n" + o);
+		console.log("-------------");
+</script>
+
+2.一元加和减操作符
+在对非数值应用一元加或减操作符时，该操作符会像Number()转型函数一样对这个值执行转换。
+<script type="text/javascript">
+	var s1 = "01",
+		s2 = "1.1",
+		s3 = "z",
+		f = 1.1,
+		b = false,
+		o = {
+			valueOf: function () {
+				return -1;
+			}
+		};
+
+	s1 = +s1;	
+	s2 = +s2;	
+	s3 = +s3;
+	b = +b;
+	f = +f;
+	o = +o;
+
+	console.log(s1 + "\n" + s2 + "\n" + s3 + "\n" + b + "\n" + f + "\n" + o);
+	console.log("-------------");	
+</script>
+
+<hr>
+3.5.2 位操作符
+1.按位非~
+操作数的负值减一。
+<script type="text/javascript">
+	var num1 = 26;
+	var num2 = ~num1;
+	console.log("num1的按位非的值是：" + num2);
+	console.log("-------------");
+</script>
+
+2.按位与&
+将两个数值的每一位对齐，根据规则，对相同位置上的两个数执行AND操作。
+规则是，只在两个数值的对应位都是1时才返回1，任何一位是0，结果都是0。
+<script type="text/javascript">
+	var num1 = 25;
+	var num2 = 30;
+	var result = num1 & num2;
+	console.log("num1的二进制值是：" + num1.toString(2));
+	console.log("num2的二进制值是：" + num2.toString(2));
+	console.log("num1和num2的按位与操作的值是：" + result);
+	console.log("result的二进制值是：" + result.toString(2));
+	console.log("-------------");
+</script>
+
+3.按位或|
+按位或在有一个值是1的情况下返回1，在两个值都是0的时候返回0。
+<script type="text/javascript">
+	var num1 = 25;
+	var num2 = 30;
+	var result = num1 | num2;
+	console.log("num1的二进制值是：" + num1.toString(2));
+	console.log("num2的二进制值是：" + num2.toString(2));
+	console.log("num1和num2的按位与操作的值是：" + result);
+	console.log("result的二进制值是：" + result.toString(2));
+	console.log("-------------");
+</script>
+
+4.按位异或^
+按位异或在两个数值对应位上只有一个1时才返回1，如果对应的两位都是1或都是0，则返回0。
+<script type="text/javascript">
+	var num1 = 25;
+	var num2 = 30;
+	var result = num1 ^ num2;
+	console.log("num1的二进制值是：" + num1.toString(2));
+	console.log("num2的二进制值是：" + num2.toString(2));
+	console.log("num1和num2的按位与操作的值是：" + result);
+	console.log("result的二进制值是：" + result.toString(2));
+	console.log("-------------");
+</script>
+
+5.左移<<
+这个操作符会将数值的所有位向左移动指定的位数。
+<script type="text/javascript">
+	var oldValue = 2;
+	var newValue = oldValue << 5;
+	console.log("oldValue的二进制值是：" + oldValue.toString(2));
+	console.log("newValue值是：" + newValue);
+	console.log("newValue的二进制值是：" + newValue.toString(2));
+	console.log("-------------");
+</script>
+
+6.有符号的右移>>
+<script type="text/javascript">
+	var oldValue = 64;
+	var newValue = oldValue >> 5;
+	console.log("oldValue的二进制值是：" + oldValue.toString(2));
+	console.log("newValue值是：" + newValue);
+	console.log("newValue的二进制值是：" + newValue.toString(2));
+	console.log("-------------");
+</script>
+
+7.无符号的右移>>>
+<script type="text/javascript">
+	var oldValue = -64;
+	var newValue = oldValue >>> 5;
+	console.log("oldValue的二进制值是：" + oldValue.toString(2));
+	console.log("newValue值是：" + newValue);
+	console.log("newValue的二进制值是：" + newValue.toString(2));
+	console.log("-------------");
+</script>
+
+3.5.3 布尔操作符
+1.逻辑非
+2.逻辑与
+逻辑与操作属于短路操作符，如果第一个操作数是false，那么就不会在对第二个操作数求值。
+3.逻辑或
+逻辑或也是短路操作符，如果第一个操作数的求值结果是true，就不会对第二个操作数求值了。
+我们可以利用逻辑或的这一行为来避免为变量赋null或undefined值。例如：
+var myObject = preferredObject || backupObject;
+如果preferredObject的值不是null或undefined，那么它的值将优先赋给myObject，如果它的值是null或undefined，那么backupObject的值将被赋给myObject。
+
+<hr>
+3.5.4 乘性操作符
+乘法*、除法/、求模%
+
+<hr>
+3.5.5 加性操作符
+加法+、减法-
+
+<hr>
+3.5.6 关系操作符
+< > <= >=
+比较字符串时，比较的是两个字符串中对应位置的每个字符的字符编码值。
+如果要真正按字母表顺序比较字符串，就必须把两个字符串转换为相同的大小写形式，然后再执行比较。
+<script type="text/javascript">
+	var result = "Banana" > "apple";
+	console.log(result);
+
+	var result = "Banana".toLowerCase() > "apple".toLowerCase();
+	console.log(result);
+
+	var rs1 = "23" < "3",  // 返回true
+		rs2 = "23" < 3,    // 返回false
+		rs3 = "a" < 3;     // 返回false
+	console.log(rs1 + "\n" + rs2 + "\n" + rs3);
+	console.log("-------------");
+</script>
+NaN与任何数比较都返回false。
+
+<hr>
+3.5.7 相等操作符
+1.相等== 和 不相等!=
+如果操作数是布尔值，则转换为数值后再比较。
+如果操作数一个是字符串一个是数值，则把字符串转换为数值后再比较。
+如果操作数一个是对象而另一个不是，则调用对象的valueOf()方法，把得到的基本类型值按前面的规则比较。
+null和undefined相等。
+NaN与任何值都不相等。
+如果两个操作数都是对象，则比较它们是不是同一个对象。如果两个操作数指向同一个对象，则返回true，否则返回false。
+
+2.全等=== 和 不全等!==
+全等和不全等会在两个操作数未经类型转换的时候就进行比较。
+null和undefined不全等。
+
+<hr>
+3.5.8 条件操作符 ?:
+<script type="text/javascript">
+	var result = (5 > 3) ? 5 : 3;
+	console.log(result);
+	console.log("-------------");
+</script>
+
+<hr>
+3.5.9 赋值操作符
+=
+复合赋值操作符，目的是简化赋值操作。
++=
+-=
+*=
+/=
+%=
+<<=
+>>=
+>>>=
+
+<hr>
+3.5.10 逗号操作符
+var a = 1, b = 2, c = 3;
+
+
+<script type="text/javascript">
+	 function foo (something) {
+            console.log(this.a,something)
+            return this.a + something
+        }
+        function bind (fn,obj) {
+            return function(){
+                return fn.apply(obj,arguments)
+            }
+        }
+        var obj = {
+            a:2
+        }
+        var bar = bind(foo,obj);
+        var b = bar(3);
+        console.log(b)
+
+     console.log(typeof null);
+     console.log(null instanceof Object);
+var val = 'value';
+console.info('Value id '+(val === 'value')    );
+</script>
+
+
+</body>
+</html>

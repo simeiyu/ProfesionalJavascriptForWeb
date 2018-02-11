@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>数据类型-基本概念-JavaScript高级程序设计</title>
+</head>
+<body>
+ECMAScript有5种简单数据类型：
+undefined、null、boolean、string、number
+1种复杂数据类型：object
+<hr>
+
+3.4.1 typeof操作符
+<script type="text/javascript">
+	var message = "some messages";
+	function myFunction() {
+		alert("Hello World!");
+	}
+
+	console.log(typeof message);
+	console.log(typeof(message));
+	console.log(typeof 99);
+	console.log(typeof myFunction);
+	console.log(typeof(myFunction));
+</script>
+
+typeof是一个操作符而不是函数，因此例子中的圆括号尽管可以使用，但不是必须的。
+
+
+<hr>
+3.4.2 Undefined类型
+Undefined类型只有一个值，即特殊的undefined。
+<script type="text/javascript">
+	var msg;
+	// var age;
+	console.log(msg);
+	console.log(typeof msg);
+	console.log(msg == undefined);
+	// console.log(age); 会产生错误
+	console.log(typeof age); // 返回 undefined
+</script>
+
+<hr>
+3.4.3 Null类型
+Null类型只有一个值，即null。
+null表示一个空对象指针，所以用typeof检测null的数据类型会返回object。
+
+如果定义的变量准备在将来用于保存对象，那么最好将该变量初始化为null。这样只要检查null值就可以知道相应的变量是否已经保存了一个对象的引用。
+
+<script type="text/javascript">
+	var car = null;
+
+	console.log(typeof car);
+	car = "Volvo";
+
+	if (car != null) {
+		console.log(car);
+	}
+
+	console.log(undefined == null);
+</script>
+undefined是派生自null的，所以它们之间的相等操作符总是返回true。
+
+<hr>
+3.4.4 Boolean类型
+Boolean类型只有两个字面值，true和false。
+true不一定等于1，false不一定等于0。
+
+ECMAScript中所有类型的值都有与true或false等价的值，
+要将一个值转换为与其对应的Boolean值，可以调用转型函数Boolean():
+<script type="text/javascript">
+	var msg = "Hello World!"
+	var msgAsBoolean = Boolean(msg);
+	console.log("msg的布尔值是：" + msgAsBoolean);
+</script>
+
+各种数据类型及其对应的转换规则：
+String类型，任何非空字符串都转换为Boolean类型的值是true，空字符串转换为Boolean类型的值是false。
+Number类型，任何非0数字值（包括无穷大）转换为Boolean类型是true，0和NaN转换为Boolean类型是false。
+Object类型，任何对象转换为Boolean类型都是true，null转换为Boolean类型是false。
+Undefined类型，undefined转换为Boolean类型的值是false。
+
+这些转换规则对应理解流控制语句（如if语句）自动执行相应的Boolean转换非常重要，请看下面代码：
+<script type="text/javascript">
+	var msg = "Hello World!";
+	if (msg) {
+		console.log("Value of msg is true!");
+	}
+
+	var more = "";
+	if (more) {
+		console.log("Value of more is true!");
+	} else {
+		console.log("Value of more is false!");
+	}
+</script>
+
+<hr>
+3.4.5 Number类型
+为支持各种数值类型，ECMA-262定义了不同的数值字面量格式。
+最基本的数值字面量格式是十进制整数。
+八进制字面量在严格格式下是无效的，会导致支持的JavaScript引擎抛出错误。
+十六进制字面量的前两位必须是0x。
+
+在进行算术计算时，所以八进制和十六进制表示的数值最终都将被转换为十进制数值。
+
+1.浮点数值
+浮点数值中必须包含一个小数点，小数点后至少有一位数字。
+保存浮点数值需要的内存空间是保存整数值的两倍，所以ESMAScript会不失时机的将浮点数转为整数。如：1.0，10.之类的。
+极大或极小的数值用e表示法。0.00000141表示为1.41e-6;
+
+在进行算术计算时，浮点数值的精度远远不如整数值。
+
+<script type="text/javascript">
+	var a = 0.1;
+	var b = 0.2;
+	console.log("a + b = " + (a + b));
+	if (a + b == 0.3) {
+		console.log("它们是相等的。")
+	} else {
+		console.log("它们不相等。")
+	}
+	// 为啥只有0.1和0.2不可以呢？
+</script>
+
+<hr>
+2.数值范围
+最小数值：Number.MIN_VALUE
+最大数值：Number.MAX_VALUE
+超出JavaScript数值范围的数值自动转换为特殊的Infinity值，Infinity不能参与计算。
+要确定一个数值是不是有穷的，可以使用isFinity()函数。参数位于最大值与最小值之间时，返回true。
+<script type="text/javascript">
+	console.log("最小值" + Number.MIN_VALUE);
+	console.log("最大值" + Number.MAX_VALUE);
+
+	var max = Number.MAX_VALUE + Number.MAX_VALUE;
+	if (!isFinite(max)) {
+		console.log("max的值是无穷大");
+	}
+</script>
+
+<hr>
+3.NaN
+NaN，即非数值（Not a Number）是一个特殊的值。表示一个本来要返回数值的操作数未返回数值的情况。
+任何涉及NaN的操作都返回NaN；NaN与任何值都不相等，包括NaN本身。
+
+isNaN()函数接受任何类型的参数，如果该参数不能转换为数值，则返回true。
+
+<script type="text/javascript">
+	console.log("NaN 不是数值！" + isNaN(NaN));
+	console.log("10 不是数值！" + isNaN(10));
+	console.log("字符串10 不是数值！" + isNaN("10"));
+	console.log("undefined 不是数值！" + isNaN(undefined));
+	console.log("null 不是数值！" + isNaN(null));
+	console.log("布尔值false 不是数值！" + isNaN(false));
+	console.log("布尔值true 不是数值！" + isNaN(true));
+</script>
+
+isNaN()函数也适用于对象，在基于对象调用isNaN()函数时，会先调用对象的valueOf()方法，然后确定该方法返回的值是否可以转换为数值。如果不能，再基于这个值调用toString()方法，再测试返回值。
+
+
+<hr>
+4.数值转换
+有3个函数可以把非数值转换为数值：
+Number()、parseInt()和parseFloat()。这三个函数对于同样的输入会有不同的返回结果。
+转型函数Number()可以用于任何数据类型，而parseInt()和parseFloat()专门用于把字符串转换成数值。
+
+Number()函数的转换规则：
+如果是Boolean值，false转换为0，true转换为1。
+如果是Number值，只是值的输入和输出。
+如果是Null值，则返回0。
+如果是Undefined值，则返回NaN。
+如果是字符串......
+如果是对象......
+
+parseInt()函数的转换规则：
+
+parseFloat()函数的转换规则：
+parseFloat只解析十进制。
+
+<script type="text/javascript">
+	console.log("Number()函数转换示例：");
+	console.log("true转换为数值" + Number(true));
+	console.log("false转换为数值" + Number(false));
+	console.log("undefined转换为数值" + Number(undefined));
+	console.log("null转换为数值" + Number(null));
+	console.log("01转换为数值" + Number(01));
+	console.log("073转换为数值" + Number(073));
+	console.log("0x12转换为数值" + Number(0x12));
+	console.log("字符串0x12转换为数值" + Number("0x12"));
+	console.log("字符串007转换为数值" + Number("007"));
+	console.log("字符串0.07转换为数值" + Number("0.07"));
+	console.log("字符串07mv转换为数值" + Number("07mv"));
+	console.log("字符串Hello World转换为数值" + Number("Hello World"));
+	console.log("空字符串转换为数值" + Number(""));
+
+	console.log("parseInt()函数转换示例：");
+	console.log("字符串0x12转换为数值" + parseInt("0x12"));
+	console.log("字符串007转换为数值" + parseInt("007"));
+	console.log("字符串062转换为数值" + parseInt("062"));
+	console.log("字符串062转换为数值" + parseInt("062", 8));
+	console.log("字符串0.07转换为数值" + parseInt("0.07"));
+	console.log("字符串07mv转换为数值" + parseInt("07mv"));
+	console.log("字符串Hello World转换为数值" + parseInt("Hello World"));
+	console.log("空字符串转换为数值" + parseInt(""));
+
+</script>
+
+
+<hr>
+3.4.6 String类型
+由零或多个16位Unicode字符组成的字符序列，即字符串。
+
+1.字符字面量
+转义序列用于表示非打印字符。
+<script type="text/javascript">
+	console.log("Who are you?\ntugui!")
+</script>
+
+2.字符串的特点
+ECMAScript中的字符串一经创建就不可改变，若要改变必先销毁。
+
+3.转换为字符串
+两种方法：toString()和String();
+可以将输出数值的基数作为toString()的参数。
+
+在不知道要转换的值是不是null或undefined的情况下，可以使用转型函数String()，这个函数可以将任何类型的值转换为字符串。
+<script type="text/javascript">
+	var num = 074;
+	var bl_1 = true;
+	var bl_2 = false;
+	var nl = null;
+	var und = undefined;
+
+	console.log("toString方法示例：")
+	console.log("Boolean类型的true转换成字符串：" + bl_1.toString());
+	console.log("Boolean类型的false转换成字符串：" + bl_2.toString());
+	console.log("Number类型num转换成字符串：" + num.toString());
+
+	console.log("String方法示例：")
+	console.log("Boolean类型的true转换成字符串：" + String(bl_1));
+	console.log("Boolean类型的false转换成字符串：" + String(bl_2));
+	console.log("Number类型num转换成字符串：" + String(num));
+	console.log("Undefined类型转换成字符串：" + String(und));
+	console.log("Null类型转换成字符串：" + String(nl));
+
+	console.log("toString方法传参");
+	console.log("074输出为二进制字符串值为" + num.toString(2));
+	console.log("074输出为八进制字符串值为" + num.toString(8));
+	console.log("074输出为十进制字符串值为" + num.toString(10));
+	console.log("074输出为十六进制字符串值为" + num.toString(16));
+</script>
+
+<hr>
+3.4.7 Object 类型
+在ESMAScript中，Object类型是所有它的实例的基础。Object类型所具有的任何属性和方法也存在于更具体的对象中。
+Object类型的每个实例都具有下列属性和方法：
+Constructor、hasOwnProperty(propertyName)、isPrototypeOf(object)、propertyIsEnumberable(propertyName)、toLocalString()、toString()、valueOf()
+
+
+
+</body>
+</html>

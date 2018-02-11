@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>1. 基本用法 | 2. 2d上下文 - 使用Canvas绘图</title>
+	<style type="text/css">
+		* {
+			box-sizing: border-box;
+			/*padding: 0;
+			margin: 0;*/
+		}
+		*::before, *::after {
+			box-sizing: border-box;
+		}
+		.canvas {
+			width: 100%;
+			padding-bottom: calc(100% * 3 / 5);
+			height: 0;
+			position: relative;
+			/*background-color: #ddfe28;*/
+		}
+		.parent {
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			/*width: 600px;
+			height: 400px;*/
+			border: 1px solid #ddd;
+		}
+		.img_box {
+			width: 50%;
+		}
+		.img_box img {
+			width: 100%;
+			height: auto;
+		}
+	</style>
+</head>
+<body>
+<div class="canvas">
+	<div class="parent">
+		<canvas id="drawing">您的浏览器版本太低，不支持canvas绘图</canvas>
+	</div>
+</div>
+<img src="timg.jpg" alt="绘制图像" style="display: none;">
+<img src="20160319125047_BieSL.png" alt="绘制图像" style="display: none;">
+<div class="img_box"></div>
+<script type="text/javascript">
+	var drawing = document.getElementById("drawing");
+	// 首先要检测getContext()方法是否存在，确定浏览器支持canvas元素
+	if (drawing.getContext) {
+
+		// 2d上下文的坐标开始于canvas元素的左上角，原点坐标是(0,0)。
+		// 默认情况下，width和height表示水平和垂直两个方向上可用的像素数目。
+		drawing.width = drawing.parentNode.scrollWidth;
+		drawing.height = drawing.parentNode.scrollHeight;
+		// drawing.style.backgroundColor = "#f0ce57";
+
+		// 创建context对象
+		var ctx = drawing.getContext("2d");		
+
+		
+		/*
+		----------------------------
+		   15.2.1 填充和描边
+		----------------------------
+		*/
+		ctx.fillStyle = "#f0ce57";
+		ctx.strokeStyle = "black";
+
+		// 描边线条的宽度由lineWidth属性控制，该属性的值可以是任意整数。
+		ctx.lineWidth = 8;
+
+		// 通过lineCap属性可以控制线条末端的形状是平头、圆头或方头（"butt"、"round"或"square"）。
+		ctx.lineCap = "round";
+
+		// 通过lineJoin属性可以控制线条相交的方式是圆交、斜交还是斜接（"round"、"bevel"或"miter"）。
+		ctx.lineJoin = "round";
+
+		
+		/*
+		----------------------------
+		   15.2.2 绘制矩形
+		----------------------------
+		*/
+		// 与矩形有关的方法：fillRect()、strokeRect()、clearRect()。都接受4个参数：x坐标、y坐标、宽度、高度。
+		ctx.fillStyle = "rgba(0,0,255,0.6)";
+		ctx.strokeStyle = "rgba(0,0,255,0.6)";
+		ctx.fillRect(10, 10, 160, 90);
+		ctx.strokeRect(180, 10, 160, 90);
+
+		// 清除画布上的矩形区域
+		ctx.clearRect(50, 30, 40, 40);
+
+		
+		/*
+		----------------------------
+		   15.2.3 绘制路径
+		----------------------------
+		*/
+		// 通过绘制路径可以创造出复杂的形状或线条。
+		// 要绘制路径，首先必须调用beginPath()方法，表示要开始绘制新路径。然后再通过调用下列方法来实际地绘制路径。
+		// ---------------------------------------------
+		// arc(x, y, radius, startAngle, endAngle, counterClockwise)：(x, y)为圆心，radius半径，起始角度，结束角度，counterClockwise为false表示顺时针方向。
+		// acrTo(x1, y1, x2, y2, radius)：从上一点开始绘制一条弧线，到(x2, y2)为止，并且以给定的半径radius穿过(x1, y1)。
+		// bezierCurveTo(c1x, c1y, c2x, c2y, x, y)：从上一点开始绘制一条曲线，到(x, y)为止，并且以(c1x, c1y)和(c2x, c2y)为控制点。
+		// lineTo(x, y)：从上一点开始绘制一条直线，到(x, y)为止。
+		// moveTo(x, y)：将绘图游标移动到(x, y)，不画线。
+		// quadraticCurveTo(cx, cy, x, y)：从上一点开始绘制一条二次曲线，到(x, y)为止，并且以(cx, cy)为控制点。
+		// rect(x, y, width, height)：从(x, y)开始绘制一个矩形，宽度和高度分别由width和height指定。
+		// 这个方法绘制的是矩形路径，而不是strokeRect()或fillRect()所绘制的独立的形状。
+		// --------------------------------------
+		// 绘制了路径后，如果想绘制一条连接到路径起点的线条，可以调用closePath()。
+		// 如果路径已经完成，想要用fillStyle填充它，可以调用fill()方法。
+		// 如果想要用strokeStyle对路径描边，可以调用stroke()方法。
+		// 调用clip()，可以在路径上创建一个剪切区域
+		// --------------------------------------------
+		// isPointInPath(x, y)方法，接收(x, y)坐标作为参数，用于路径被关闭之前确定画布上的某一点是否位于路径上。
+		
+		// 例子：绘制一个不带数字的时钟表盘
+		// 开始路径
+		ctx.beginPath();
+		// 绘制外圆
+		ctx.arc(400, 300, 100, 0, 2 * Math.PI, false);
+		// 绘制内圆
+		ctx.moveTo(490, 300);  // 在绘制内圆之前，必须把路径移动到外圆上的某一点，以避免绘制出多余的线条。
+		ctx.arc(400, 300, 90, 0, 2 * Math.PI, false);   // 周长 = 直径 * π
+
+		// 绘制分针
+		ctx.moveTo(0, 0);
+		ctx.lineTo(0, -60);
+		// 绘制时针
+		ctx.moveTo(0, 0);
+		ctx.lineTo(50, 0);
+		// 定义描边宽度
+		ctx.lineWidth = 2;
+		// 定义描边颜色
+		ctx.strokeStyle = "#aedc08";
+		// 描边
+		ctx.stroke();
+
+
+		if (ctx.isPointInPath(300, 300)) {
+			console.log("坐标（300,300）位于路径上！");  // 明明没有位于路径上嘛
+			// ctx.fillRect(300, 300, 10, 10);
+		}
+
+
+		// 额外的知识------------
+		// 弧度：两条射线从圆心向圆周射出，形成一个夹角和夹角正对的弧。当这段弧长正好等于圆的半径时，而两条射线的夹角等于1弧度。
+		// 弧度 = 弧长 / 半径
+		// 1周角（360°） = 周长（2 * 半径 * π） / 半径，即
+		// 1周角 = 2 * π
+		// 1平角（180°） = 半周长（2 * 半径 * π / 2） / 半径，即
+		// 1平角 = π
+		// 
+		// 度与弧度
+		// 360度 = 2 * π，即
+		// 1° = π / 180 （弧度）
+		// 弧度 = 度 * π/180
+		// 90° = 90 * π / 180 = π / 2 (弧度)
+
+
+		
+		/*
+		----------------------------
+		   15.2.4 绘制文本
+		----------------------------
+		*/
+		// 绘制文本主要有两个方法：
+		// fillText()和strokeText()，都可以接受4个参数：要绘制的文本字符串、x坐标、y坐标、可选的最大像素宽度。
+		// 这两个方法都以下列3个属性为基础：
+		// font：表示文本样式、大小及字体。
+		// textAlign：表示文本对齐方式。可能的值有"start"、"end"、"left"、"right"及"center"。建议使用"start"和"end"而不是"left"和"right"，前者更稳定。
+		// textBaseline：表示文本的基线。可能的值有"top"、"hanging"、"middle"、"alphabetic"、"ideographic"和"bottom"。
+		// 
+		// 
+		// 例子：在表盘上绘制数字------------
+		// 初始化文本样式
+		ctx.font = "bold 16px Arial";
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+
+		ctx.save();
+
+		// 数字颜色
+		ctx.fillStyle = "#aedc08";
+
+		ctx.save();
+
+		// 声明圆心坐标
+		var x = 400, y = 300;
+		// 声明三角形直角对应的边c
+		var c = 75;
+		// 声明三角形30°角对应的边
+		var a =  c / 2;
+		// 声明三角形60°角对应的边
+		var b =  Math.sqrt(Math.pow(c, 2) - Math.pow(a, 2));
+
+		// 绘制数字
+		ctx.fillText("1", x + a, y - b);
+		ctx.fillText("2", x + b, y - a);
+
+		ctx.fillText("3", x + c, y);
+
+		ctx.fillText("4", x + b, y + a);
+		ctx.fillText("5", x + a, y + b);
+
+		ctx.fillText("6", x, y + c);
+
+		ctx.fillText("7", x - a, y + b);
+		ctx.fillText("8", x - b, y + a);
+
+		ctx.fillText("9", x - c, y);
+
+		ctx.fillText("10", x - b, y - a);
+		ctx.fillText("11", x - a, y - b);
+
+		ctx.fillText("12", x, y - c);
+
+
+
+		// 又一个例子：
+		ctx.textAlign = "start";
+		ctx.textBaseline = "bottom";
+		var fontsize = 100;
+		ctx.font = fontsize + "px Arial";
+		while (ctx.measureText("Hello World!").width > 140) {
+			fontsize--;
+			ctx.font = fontsize + "px Arial";
+		}
+		ctx.fillText("Hello World!", 10, 200);
+		ctx.fillText("Font Size is " + fontsize + "px Arial", 10, 240);
+
+		
+		/*
+		----------------------------
+		   15.2.5 变换
+		----------------------------
+		*/
+		// 变换原点
+		ctx.translate(400, 300);  // 15.2.5 变换
+		// 旋转表针
+		ctx.rotate(1);   // 1弧度
+
+		ctx.save();
+
+
+		// 绘制分针
+		ctx.moveTo(0, 0);
+		ctx.lineTo(0, -60);
+		// 绘制时针
+		ctx.moveTo(0, 0);
+		ctx.lineTo(50, 0);
+		// 定义描边宽度
+		ctx.lineWidth = 2;
+		// 定义描边颜色
+		ctx.strokeStyle = "#aedc08";
+		// 描边
+		ctx.stroke();
+
+		
+		// ---------------------------
+		// 无论是刚才执行的变换，还是fillStyle、strokeStyle等属性，都会在当前上下文中一直有效，除非再对上下文进行什么修改。
+		// 虽然没有什么办法把上下文中的一切都重置回默认值，但有两个办法可以跟踪上下文的状态变换。
+		// 如果你知道将来还要返回某组属性与变换的组合，可以调用save()方法。
+		// 调用这个方法后，当时所有的设置都会进入一个栈结构，得以妥善保管。
+		// 等想要回到之前保存的设置时，可以调用restore()方法，在保存设置的栈结构中向前返回一级，恢复之前的状态。
+		// ------------------------------
+		ctx.fillStyle = "#ff0000";
+		ctx.save();
+
+		ctx.fillStyle = "#00ff00";
+		ctx.translate(100, 100);
+		ctx.save();
+
+		ctx.fillStyle = "#0000ff";
+		ctx.fillRect(0, 0, 100, 30);
+
+		ctx.restore();
+		ctx.fillRect(10, 20, 40, 40);
+
+		ctx.restore();
+		ctx.fillRect(-40, 50, 40, 40);
+
+
+		ctx.restore();
+		ctx.restore();
+
+		ctx.fillRect(500, 10, 60, 40);
+		ctx.strokeRect(500, 60, 60, 40);
+
+		ctx.textAlign = "start";
+		ctx.save();
+		ctx.fillText("往事只能回味", 500, 120);
+
+
+		
+		/*
+		----------------------------
+		   15.2.6 绘制图像
+		----------------------------
+		*/
+		// drawImage()方法。根据期望的结果不同，调用这个方法时，可以使用三种不同的参数组合。
+		// 一、传入一个HTML的img元素，绘制该图像的起点的x,y坐标。绘制到画布上的图像与原始大小一样。
+		var imgsr = document.images[0];
+		ctx.drawImage(imgsr, 640, 10);
+		// 二、想改变绘制后图像的大小，可以再多传入两个参数，分别表示目标宽度和高度。通过这种方式来缩放图像并不影响上下文的变换矩阵。
+		ctx.drawImage(imgsr, 20, 340, 60, 40);
+		// 三、还可以选择把图像上的某个区域绘制到上下文中。
+		// 需要传入9个参数：要绘制的图像，源图像的x坐标、y坐标、宽度、高度，目标图像的x坐标、y坐标、宽度、高度。
+		ctx.drawImage(imgsr, 100, 160, 200, 200, 560, 300, 100, 100);
+
+		// 除了给drawImage()方法传入HTML的img元素外，还可以传入另一个canvas元素作为其第一个参数。这样，就可以把另一个画布内容绘制到当前画布上。
+		// 结合使用drawImage()和其他方法，可以对图像进行各种基本操作，而操作的结果可以通过toDataURL()方法获得。
+		// 图像不能来自其他域，不然调用toDataURL()会抛出错误。
+
+
+		
+		/*
+		----------------------------
+		   15.2.7 阴影
+		----------------------------
+		*/
+		// 2D上下文会根据以下几个属性的值，自动为形状或路径绘制出阴影。
+		// shadowColor：用CSS格式表示的阴影颜色，默认为黑色。
+		// shadowOffsetX：形状或路径X轴方向的阴影偏移量，默认为0。
+		// shadowOffsetY：形状或路径Y轴方向的阴影偏移量，默认为0。
+		// shadowBlur：模糊的像素数，默认为0，即不模糊。
+		// ---------------
+		ctx.shadowColor = "rgba(0,0,0,0.5)";
+		ctx.shadowOffsetX = 5;
+		ctx.shadowOffsetY = 5;
+		ctx.shadowBlur = 3;
+
+		ctx.save();
+
+		ctx.fillRect(20, 600, 120, 80);
+		ctx.strokeStyle = "#fdba2c";
+		ctx.strokeRect(200, 600, 120, 80);
+
+		ctx.restore();
+		ctx.restore();
+
+		ctx.fillRect(350, 600, 120, 80);
+
+		ctx.clearRect(300, 300, 100, 100);
+
+
+		
+		/*
+		----------------------------
+		   15.2.8 渐变
+		----------------------------
+		*/
+		// 渐变由CanvasGradient实例表示，很容易通过2D上下文来创建和修改。
+		// 要创建一个新的线性渐变，可以调用createLinearGradient()方法，接受4个参数：起点x、y坐标，终点x、y坐标。
+		// 创建了渐变对象后，使用addColorStop()方法指定色标。接受2个参数：色标位置和css颜色值。色标位置是一个0（开始位置）到1（结束位置）之间的数字。
+		// 为了让渐变覆盖整个矩形，矩形和渐变的坐标必须匹配。如果没有把矩形绘制到恰当的位置，可能只会显示部分渐变效果。
+		// 
+		// createRadialGradient()方法创建径向渐变，接收6个参数：起点圆的圆心坐标（x,y）和半径，终点圆的圆心（x,y）和半径。
+		// 
+		// -----------
+		
+		// 线性渐变
+		var gradient = ctx.createLinearGradient(400, 300, 700, 500);
+		gradient.addColorStop(0, "white");
+		gradient.addColorStop(1, "black");
+
+		// 绘制渐变矩形
+		ctx.fillStyle = gradient;
+		ctx.fillRect(450, 400, 100, 60);  // 显示部分渐变效果
+		ctx.fillRect(400, 300, 300, 200); // 渐变覆盖整个矩形
+
+		// 确保形状与肩部对齐非常重要，有时候可以考虑使用函数来确保坐标对齐。
+		function createRectLinearGradient(context, x, y, width, height) {
+			return context.createLinearGradient(x, y, x + width, y + height);
+		}
+
+		var gradient2 = createRectLinearGradient(ctx, 50, 50, 100, 60);
+		gradient2.addColorStop(0, "red");
+		gradient2.addColorStop(1, "yellow");
+
+		ctx.fillStyle = gradient2;
+		ctx.fillRect(50, 50, 100, 60);
+
+		// -----------
+		
+		// 径向渐变
+		var radial = ctx.createRadialGradient(600, 300, 100, 600, 300, 200);  // 同心圆
+		radial.addColorStop(0, "red");
+		radial.addColorStop(1, "yellow");
+
+		ctx.fillStyle = radial;
+		ctx.fillRect(400, 100, 400, 400);
+
+
+		
+		/*
+		----------------------------
+		   15.2.9 模式
+		----------------------------
+		*/
+		// 模式其实就是重复图像，可以用来填充或描边图形。
+		// createPattern()方法，创建一个新模式。接收2个参数：一个HTML的img元素和一个表示如何重复图像的字符串。
+		// 其中，第二个参数的值与CSS的background-repeat属性值相同，包含"repeat"、"no-repeat"、"repeat-x"、"repeat-y"。
+		// 注意：模式与渐变一样，都是从画布的原点开始的，将填充样式设置为模式对象，只表示在某个特定的区域内显示重复的图像，而不是要从某个位置开始绘制重复的图像。
+		// createPattern()方法的第一个参数也可以是一个video元素或者另外一个canvas元素。
+		var imgP = document.images[1];
+		var newPattern = ctx.createPattern(imgP, "repeat");
+
+		ctx.fillStyle = "#fdebc0";
+		ctx.fillRect(840, 160, 120, 100);
+
+		ctx.fillStyle = newPattern;
+		ctx.fillRect(840, 20, 120, 100);
+
+
+		
+		/*
+		----------------------------
+		   15.2.10 使用图像数据
+		----------------------------
+		*/
+		// 可以通过getImageData()取得原始图像数据。这个方法接收4个参数：
+		// 要取得其数据的画面区域的x、y坐标以及该区域的像素宽度和高度。
+		// 该方法返回的对象是ImageData实例。每个ImageData对象有三个属性：width、height、data。
+		// 其中data属性是一个数组，保存着图像中每一个像素的数据。
+		// 在data数组中，每一个像素用4个元素来保存，分别表示红、绿、蓝和透明度值。
+		// 
+		// 例如，要取得左上角坐标为(10,5)，大小为50*50像素区域的图像数据，可以使用以下代码：
+		var imageData = ctx.getImageData(820, 40, 50, 50);
+		var data = imageData.data;
+
+		console.log(data.join(","));
+		
+		// 整理data中的数据，使每一个像素的数据成为数组...
+		var dataArray = [];
+		var pxObj = null;
+		var r = "", g = "", b = "", a = "";
+		for (var i=0, len=Math.ceil(data.length/4); i < len; i++) {
+			r = data[i];
+			g = data[i+1];
+			b = data[i+2];
+			a = data[i+3];
+			pxObj = {
+				"red": r,
+				"green": g,
+				"blue": b,
+				"alpha": a
+			}
+			dataArray.push(pxObj);
+		}
+
+		for (var j=0; j < dataArray.length; j++) {
+			if (j < 50) {
+				console.log("第" + (j+1) + "个像素的rgba值: " + dataArray[j].red + "," + dataArray[j].green + "," + dataArray[j].blue + "," + dataArray[j].alpha);
+			} else {
+				break;
+			}
+			console.log(j);	
+		}
+		
+		
+
+
+		
+
+
+
+
+		// 使用toDataURL()方法可以导出在canvas元素上绘制的图像。这个方法接受一个参数，即图像的MIME类型格式，而且适用于创建图像的任何上下文。
+		// 取得图像的URL数据
+		var imgURL = drawing.toDataURL("image/png");
+		// 显示图像
+		var image = document.createElement("img");
+		image.src = imgURL;
+		// document.querySelector(".img_box").appendChild(image);
+	}
+</script>
+
+
+
+
+</body>
+</html>  

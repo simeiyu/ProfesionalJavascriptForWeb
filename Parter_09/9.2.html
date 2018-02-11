@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>怪癖检测-客户端检测</title>
+</head>
+<body>
+怪癖检测（quirks detection）的目标是识别浏览器的特殊行为。但与能力检测确认浏览器支持什么能力不同，怪癖检测是想要知道浏览器存在什么缺陷（“怪癖”也就是bug）。
+这通常需要运行一小段代码，以确定某一特性不能正常工作。
+
+例如，ＩＥ８及更早版本中存在一个ｂｕｇ，即如果某个实例属性与标记为[[DontEnum]]的某个原型属性同名，那么该实力属性不会出现在for-in循环中。
+可以使用如下代码来检测这种"怪癖"。
+<script type="text/javascript">
+	var hasDontEnumQuirk = function () {
+		var o = {toString: function(){}};
+		for (var prop in o) {
+			if (prop == "toString") {
+				return false;
+			}
+		}
+		return true;
+	}();
+</script>
+
+另一个经常需要检测的"怪癖"是Safari以前版本会枚举被隐藏的属性。可以用下面的函数来检测该怪癖：
+<script type="text/javascript">
+	var hasEnumShadowsQuirk = function () {
+		var o = {toString: function(){}};
+		var count = 0;
+		for (var prop in o) {
+			if (prop == "toString") {
+				count++;
+			}
+		}
+
+		return (count > 1);
+	}();
+</script>
+
+一般来说，“怪癖”都是个别浏览器所独有的，而且通常被归为bug。在相关浏览器的新版本中，这些问题可能会也可能不会被修复。
+
+由于检测“怪癖”涉及运行代码，因此建议只检测那些对自己有直接影响的“怪癖”，而且最好在脚本一开始就执行此类检测，以便尽早解决问题。
+
+
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>RegExp类型-引用类型-JavaScript高级程序设计</title>
+</head>
+<body>
+ECMAScript 通过RegExp类型来支持正则表达式。
+
+创建正则表达式方式一：
+字面量模式
+var expression = / pattern / flags ;
+模式（pattern）部分可以是任何简单或复杂的正则表达式。
+正则表达式的匹配模式支持3个标志（flags）：g、i、m。
+
+创建正则表达式方式二：
+RegExp构造函数
+接收两个参数：1、要匹配的字符串模式；
+			  2、可选的标志字符串。
+
+例子：匹配第一个"bat"或"cat"，不区分大小写。
+var pattern1 = /[bc]at/i;
+var pattern2 = new RegExp("[bc]at", "i");
+
+RegExp构造函数中，所有元字符必须双重转义。
+
+--------------------------------------------
+
+在ECMAScript 3 中，正则表达式字面量始终会共享同一个RegExp实例，而使用构造函数创建的每一个新RegExp实例都是一个新实例。
+在ECMAScript 5 明确规定，使用正则表达式字面量必须像直接调用RegExp构造函数一样，每次都创建新的RegExp实例。IE9+、firefox 4+和Chrome都据此作出了修改。
+
+<script type="text/javascript">
+	var re = null, i;
+	for (i = 0; i < 10; i++) {
+		re = /cat/g;
+		var result = re.test("catastrophe");
+		console.log(result);
+	}
+	for (i = 0; i < 10; i++) {
+		re = new RegExp("cat", "g");
+		var result = re.test("catastrophe");
+		console.log(result);
+	}
+	re = new RegExp("cat", "g");
+	for (i = 0; i < 10; i++) {
+		var result = re.test("catastrophe");
+		console.log(result);
+		console.log(re.lastIndex);
+	}	
+</script>
+
+
+<hr>
+5.4.1 RegExp实例属性
+RegExp的每个实例都具有下列属性，通过这些属性可以取得有关模式的各种信息。
+global：布尔值，表示是否设置了g标志。
+ignoreCase：布尔值，表示是否设置了i标志。
+lastIndex：整数，表示开始搜索下一个匹配项的字符位置，从0算起。
+multiline：布尔值，表示是否设置了m标志。
+source：正则表达式的字符串表示，按照字面量模式而非传入构造函数中的字符串模式返回。
+----------------------------------
+<script type="text/javascript">
+	console.log("------正则表达式字面量实例属性------");
+	var pattern1 = /\[bc\]at/i;
+	console.log(pattern1.global);
+	console.log(pattern1.ignoreCase);
+	console.log(pattern1.lastIndex);
+	console.log(pattern1.multiline);
+	console.log(pattern1.source);
+
+	console.log("------正则表达式构造函数实例属性------");
+	var pattern2 = new RegExp("\\[bc\\]at", "i");
+	console.log(pattern2.global);
+	console.log(pattern2.ignoreCase);
+	console.log(pattern2.lastIndex);
+	console.log(pattern2.multiline);
+	console.log(pattern2.source);	
+</script>
+
+
+<hr>
+5.4.2 RegExp实例方法
+方法一：exec()，该方法专门为捕获组设计。
+该方法返回包含第一个匹配项信息的数组；没有匹配项则返回null。
+返回的数组是Array实例，包含两个额外的属性：index和input。
+index表示匹配项在字符串中的位置；
+input表示应用正则表达式的字符串。
+------------------------------------------
+啥是“捕获组”捏？
+<script type="text/javascript">
+	console.log("------exec()方法------");
+
+	var text = "mom and dad and baby";
+	var pattern = /mom( and dad( and baby)?)?/gi;
+	var matches = pattern.exec(text);
+	console.log(matches);
+	console.log(matches.toString());
+	console.log(matches.index);
+	console.log(matches.input);
+	console.log(matches[0]);
+	console.log(matches[1]);
+	console.log(matches[2]);
+	console.log(matches[3]);
+</script>
+------------------------------------------
+在不设置全局标志的情况下，在同一个字符串上多次调用exec()将始终返回第一个匹配项的信息。
+在设置全局标志的情况下，每次调用exec()都会在字符串中继续查找新匹配项。
+<script type="text/javascript">
+	console.log("------------");
+	var text = "cat, bat, sat, fat";
+	var pattern1 = /.at/;
+	
+	for(var i = 0; i < 3; i++){
+		var matches = pattern1.exec(text);
+		console.log(matches.toString());
+		console.log(matches.index);
+		console.log(pattern1.lastIndex);
+	}
+	
+	console.log("------------");
+	
+	var pattern2 = /.at/g;
+	for(var i = 0; i < 3; i++) {
+		var matches = pattern2.exec(text);	
+		console.log(matches.toString());
+		console.log(matches.index);
+		console.log(pattern2.lastIndex);
+	}
+</script>
+
+方法二：test()，接收一个字符串参数。
+在模式与该参数匹配的情况下返回true，否则返回false。
+test()方法经常被用在if语句中。
+<script type="text/javascript">
+	console.log("-----test()方法-------");
+	
+	var text = "000-00-0000";
+	var pattern = /\d{3}-\d{2}-\d{4}/;
+	if (pattern.test(text)) {
+		console.log("号码匹配！");
+	}
+</script>
+
+方法三：继承的方法。
+toLocaleString()和toString()都会返回正则表达式的字面量，与创建正则表达式的方式无关。
+<script type="text/javascript">
+	console.log("-----toLocaleString()和toString()-------");
+	
+	var pattern = new RegExp("\\[bc\\]at", "gi");
+	console.log(pattern.toLocaleString());
+	console.log(pattern.toString());
+</script>
+
+
+
+<hr>
+5.4.3 RegExp构造函数属性
+input 最近一次要匹配的字符串；
+lastMatch 最近一次的匹配项；
+lastParen 最近一次匹配的捕获组；
+leftContext input字符串中lastMatch之前的文本；
+multiline 布尔值，表示是否所有表达式都使用多行模式；
+rightContext input字符串中lastMatch之后的文本。
+------------------------------
+<script type="text/javascript">
+	var text = "this has been a short summer";
+	var pattern = /(.)hort/g;
+	console.log("--------构造函数属性----------")
+	/*var match = pattern.exec(text);
+	if (match != null) {
+		console.log(match.toString());
+		console.log(RegExp.input);
+		console.log(RegExp.lastMatch);
+		console.log(RegExp.leftContext);
+		console.log(RegExp.rightContext);
+		console.log(RegExp.lastParen);
+		console.log(RegExp.multiline);
+		console.log(RegExp.$1);
+	}*/
+	if (pattern.test(text)) {
+		console.log(RegExp.input);
+		console.log(RegExp.lastMatch);
+		console.log(RegExp.leftContext);
+		console.log(RegExp.rightContext);
+		console.log(RegExp.lastParen);
+		console.log(RegExp.multiline);
+		console.log(RegExp.$1);
+	}
+</script>
+
+
+<hr>
+5.4.4 模式的局限性
+ECMAScript正则表达式不支持的特性：……
+
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>递归-函数表达式</title>
+</head>
+<body>
+创建函数的方式：函数声明；函数表达式。
+
+函数声明的一个重要特征是函数声明提升（function declaration hoisting），意思是在执行代码之前会先读取函数声明。
+
+以函数表达式方式创建的函数叫做匿名函数（anonymous function）。
+匿名函数的name属性是空字符串。
+
+<script type="text/javascript">
+	var condition = true;
+
+	// 不可以这样做
+	// if (condition) {
+	// 	function sayHi(){
+	// 		console.log("yes");
+	// 	}
+	// } else {
+	// 	function sayHi(){
+	// 		console.log("no");
+	// 	}
+	// }
+	
+	// 可以这样做
+	var sayHi = null;
+	if (condition) {
+		sayHi = function(){
+			console.log("yes");
+		};
+	} else {
+		sayHi = function () {
+			console.log("no");
+		};
+	}
+
+</script>
+
+能够创建函数再赋值给变量，也可以把函数作为其他函数的值返回。
+在把函数当作值来使用的情况下，都可以使用匿名函数。
+
+
+7.1 递归
+递归函数是在一个函数通过名字调用自身的情况下完成的。
+<script type="text/javascript">
+	function factorial(num){ 
+		if (num <= 1) {
+			return 1;
+		} else {
+			// return num * factorial(num - 1);
+			return num * arguments.callee(num - 1);
+		}
+	}
+</script>
+在严格模式下，不能通过脚本访问arguments.callee，访问这个属性会导致错误。
+可以使用命名函数表达式来达成相同的结果：
+<script type="text/javascript">
+	var factorial = (
+		function f (num) {
+			if (num <= 1) {
+				return 1;
+			} else {
+				return num * f(num - 1);
+			}
+		}
+	);
+</script>
+这种方式在严格模式和非严格模式下都能行得通。
+
+
+<!--高阶函数 from ES6 decorator-->
+<script>
+	function doSomething(name) {
+		console.log('Hello, ' + name);
+	}
+
+	function loggingDecorator(wrapped) {
+		return function() {
+			console.log('Starting');
+			const result = wrapped.apply(this, arguments);
+			console.log('Finished');
+			return result;
+		}
+	}
+
+	const wrapped = loggingDecorator(doSomething);
+
+</script>
+
+</body>
+</html>

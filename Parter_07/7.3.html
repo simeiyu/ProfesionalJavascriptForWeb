@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>模仿块级作用域-函数表达式</title>
+</head>
+<body>
+JavaScript没有块级作用域的概念，这意味着在语句块中定义的变量，实际上是在包含函数中而非语句中创建出来的。
+<script type="text/javascript">
+	function outputNumbers(count){
+		for(var i = 0; i < count.length; i++){
+			console.log(i); 
+		}
+		var i;      // 重新声明变量
+		console.log(i);      // 4
+	}
+
+	outputNumbers("good");
+</script>
+JavaScript从来不会告诉你是否多次声明了同一个变量；遇到这种情况它只会对后续的声明视而不见（不过，它会执行后续声明中的变量初始化）。
+匿名函数可以用来模仿块级作用域并避免这个问题。
+用作块级作用域（通常称为私有作用域）的匿名函数的语法如下：
+<script type="text/javascript">
+	(function(){
+		// 这里是块级作用域
+	})();	
+</script>
+无论在什么地方，只要临时需要一些变量，就可以使用私有作用域，例如：
+<script type="text/javascript">
+	function outputNumbers(count){
+		(function(){
+			for(var i = 0; i < count.length; i++){
+				console.log(i); // 0 1 2 3
+			}
+		})();
+		// console.log(i);      // i is not defined
+	}
+
+	outputNumbers("good");
+</script>
+一般来说，我们都应该尽量少向全局作用域中添加变量和函数。
+通过创建私有作用域，每个开发人员既可以使用自己的变量又不必担心搞乱全局作用域。
+
+<script type="text/javascript">
+	(function(){
+		var now = new Date();
+		if (now.getMonth()==0 && now.getDate()==1) {
+			alert("Happy New Year!");
+		}
+	})();
+</script>
+这种做法可以减少闭包占用的内存问题，因为没有指向匿名函数的引用。只要执行完毕，就可以立即销毁其作用域链了。
+</body>
+</html>

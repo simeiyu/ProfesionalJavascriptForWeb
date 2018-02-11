@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>HTML5-DOM扩展</title>
+</head>
+<body>
+HTML5规范围绕如何使用新增标记定义了大量JavaScript API。其中一些API与DOM重合，定义了浏览器应该支持的DOM扩展。
+（本节只讨论与DOM节点相关的内容）
+
+11.3.1 与类相关的扩充
+为了让开发人员适应并增加对class属性的新认识，HTML5增加了很多API，致力于简化CSS类的用法。
+
+<div id="myDiv">
+	<input type="text" name="username" class="username current selected">
+</div>
+
+1. getElementsByClassName()方法
+接收一个参数，即一个包含一个或多个类名的字符串，返回带有指定类的所有元素的NodeList。
+传入多个类名时，类名的先后顺序不重要。
+<script type="text/javascript">
+	// 取得所有类中包含“username”和“current”的元素，类名的先后顺序无所谓
+	var allUsernameCurrents = document.getElementsByClassName("username current");
+	console.log(allUsernameCurrents[0].className);
+
+	// 取得ID为myDiv的元素中类名带有“selected”的所有元素
+	var selected = document.getElementById("myDiv").getElementsByClassName("selected");
+	console.log(selected[0].name);
+</script>
+支持getElementsByClassName()方法的浏览器有：
+IE9+、Firefox3+、Safari3.1+、Chrome和Opera9+。
+
+
+2. classList属性
+操作类名时，需要通过className属性增加、删除、替换类名。因为className中是一个字符串，所以即使只修改字符串的一部分，也必须每次都设置整个字符串的值。
+<div id="myDiv2" class="user disabled1 be">...</div>
+删除“user”类：
+<script type="text/javascript">
+	// 取得类名字符串并拆分为数组
+	var myDiv = document.getElementsByClassName("user")[0];
+	// var myDiv = document.getElementById("myDiv2");
+	var classNames = myDiv.className.split(/\s+/);
+
+	// 找到要删除的类名
+	for(var i = 0, len = classNames.length; i < len; i++) {
+		if (classNames[i] == "user") {
+			classNames.splice(i, 1);
+			break;
+		}
+	}
+
+	// 把剩下的类名拼成字符串并重新设置
+	myDiv.className = classNames.join(" ");
+
+	console.log(myDiv.className);
+</script>
+
+HTML5新增了一种操作类名的方式，让操作更简单也更安全，那就是classList属性。
+这个classList属性是新集合类型DOMTokenList的实例。DOMTokenList具有以下属性和方法：
+· length：表示列表中包含多少值；
+· item(pos)：取得列表中pos位置的值，也可以用方括号方法；
+· add(value)：将给定的字符串值添加到列表中；
+· contains(value)：表示列表中是否存在给定的值，存在返回true，否则返回false；
+· remove(value)：从列表中删除给定的字符串；
+· toggle(value)：如果列表中已存在给定的值，删除它，如果列表中没有给定的值，添加它。
+
+上面删除“user”类的代码可以改下为：
+<script type="text/javascript">
+	var myDiv = document.getElementsByClassName("user")[0];
+	myDiv.classList.remove("user");
+
+	console.log(myDiv.className);
+</script>
+有了classList属性，除非要删除所有类名或完全重写元素的class属性，否则也用不到className了。
+支持classList的的浏览器有：
+IE10+、Firefox3.6+、Chrome8.0+等。
+
+
+11.3.2 焦点管理
+HTML5添加了辅助管理DOM焦点的功能。
+首先是document.activeElement属性，这个属性始终会引用ＤＯＭ中当前获得焦点的元素。
+默认情况下，文档刚刚加载完成时，document.activeElement中保存的是document.body元素的引用。文档加载期间，document.activeElement的值是null。
+另外，新增了document.hasFocus()方法，这个方法用于确定文档是否获得了焦点。 
+通过检测文档是否获得了焦点，可以知道用户是不是正在与页面交互。
+
+
+11.3.3 HTMLDocument的变化
+1. readyState属性
+Document的readyState属性有两个可能的值：
+· loading：正在加载文档；
+· complete：已经加载完文档。
+使用document.readyState的最恰当方式，就是通过它来实现一个指示文档已经加载完成的指示器。
+document.readyState属性的基本用法如下：
+<script type="text/javascript">
+	if (document.readyState == "complete") {
+		// 执行操作，如：
+		console.log("文档加载完成");
+	}
+
+	if (document.readyState == "loading") {
+		console.log("正在加载文档");          // 正在加载文档
+	}
+</script>
+支持readyState属性的浏览器有：IE4+、Firefox3.6+、Safari、Chrome、Opera9+。
+
+2. 兼容模式
+从IE6开始区分页面的渲染模式是标准的还是混杂的。
+compatMode属性，告诉开发人员浏览器采用了哪种渲染模式。
+在标准模式下，document.compatMode的值等于“CSS1Compat”，而在混杂模式下，document.compatMode的值等于“BackCompat”。
+<script type="text/javascript">
+	if (document.compatMode == "CSS1Compat") {
+		console.log("标准模式");
+	} else {
+		console.log("兼容模式");
+	}
+</script>
+实现这个属性的浏览器有IE+、Firefox、Safari3.1+、Chrome、Opera。
+
+3. head属性
+作为对document.body引用文档body元素的补充，HTML5新增了document.head属性，引用文档的head元素。
+要引用文档的head元素，可以结合这个属性和另一种后备方法：
+<script type="text/javascript">
+	var head = document.head || document.getElementsByTagName("head")[0];
+</script>
+实现document.head属性的浏览器有Chrome和Safari5。
+
+
+11.3.4 字符集属性
+HTML5新增了几个与文档字符集有个的属性。
+· charset属性，表示文档中实际使用的字符集，也可以用来指定新字符集。
+· defaultCharset属性，表示根据默认浏览器设置及操作系统的设置，当前文档的字符集应该是什么。
+<script type="text/javascript">
+	// 读取当前文档字符集
+	console.log(document.charset);
+
+	// 设置文档字符集
+	document.charset = "UTF-8";
+
+	// 如果文档没有使用默认的字符集，那charset和defaultCharset的值可能不一样
+	if (document.charset != document.defaultCharset) {
+		console.log("本文档使用了自定义字符集");
+	}
+
+	console.log(document.defaultCharset); // undefined
+</script>
+支持charset的浏览器有：IE、Firefox、Safari、Chrome和Opera。
+支持defaultCharset的浏览器有：IE、Safari和Chrome。
+
+
+13.3.5 自定义数据属性
+HTML5规定可以为元素添加非标准的属性，但要添加前缀“data-”，目的是为元素提供与渲染无关的信息，或者提供语义信息。
+这些属性可以任意添加、随便命名，只要以“data-”开头即可。
+· dataset属性：添加了自定义属性后，可以用元素的dataset属性来访问自定义属性的值。
+dataset属性的值是一个DOMStringMap的实例，也就是一个名值对的映射。
+<div id="dataTest" data-appId="1-1" data-myName="Machel">试试自定义属性...</div>
+<script type="text/javascript">
+	var dataTest = document.getElementById("dataTest");
+	// 取得自定义属性的值
+	var appId = dataTest.dataset.appid;    // 注意大小写
+	var myName = dataTest.dataset.myname;
+	// 控制台打印
+	console.log(appId);
+	console.log(myName);
+	console.log(dataTest.dataset);
+
+	// 设置自定义属性的值
+	dataTest.dataset.appid = "1.1";
+	dataTest.dataset.myname = "密歇根";
+	// 取得自定义属性的值
+	var appId = dataTest.dataset.appid;    // 注意大小写
+	var myName = dataTest.dataset.myname;
+	// 控制台打印
+	console.log(appId);
+	console.log(myName);
+
+	// 判断有没有“where”的值
+	if (dataTest.dataset.where) {
+		console.log("地点是：" + dataTest.dataset.where);
+	} else {
+		console.log("“data-where”属性没有定义");
+	}
+</script>
+支持自定义属性的浏览器有：IE11+、Chrome8+、Firefox6+、Opera11.1+、Safari6+。
+如果考虑兼容性，可以用setAttribute()、getAttribute()存取dataset。
+
+
+11.3.6 插入标记
+使用插入标记的技术，直接插入HTML字符串不仅简单，速度也更快。
+以下与插入标记相关的DOM扩展已经纳入了HTML5规范。
+1. innerHTML属性
+在读模式下，innerHTML属性返回与调用元素所有子节点（包括元素、注释和文本节点）对应的HTML标记。
+在写模式下，innerHTML属性会根据指定的值创建新的DOM树，然后用这个DOM树完全替换调用元素原来的所有子节点。
+<div id="content">
+	<p>This is a <strong>paragraph</strong> with a list following it.</p>
+	<ul>
+		<li>Item 1</li>
+		<li>Item 2</li>
+		<li>Item 3</li>
+	</ul>
+</div>
+<script type="text/javascript">
+	var div = document.getElementById("content");
+	var innerHTML = div.innerHTML;
+	console.log(innerHTML);
+
+	div.innerHTML = "<dl><dt>光良：</dt><dd>《第一次说爱你的时候》</dd></dl>";
+</script>
+使用innerHTML的限制：
+· 大多数浏览器中，使用innerHTML插入script元素并不会执行其中的脚本。
+· 大多数浏览器，都支持以直观的方式通过innerHTML插入style元素。
+· 并不是所有元素都支持innerHTML属性，不支持的元素有：col、colgroup、frameset、head、html、style、table、tbody、thead、tfoot、tr。
+
+2. outerHTML属性
+在读模式下，outerHTML返回调用它的元素及所有子节点的HTML标签。
+在写模式下，outerHTML会根据指定的HTML字符串创建新的DOM子树，然后用这个DOM子树完全替换调用元素。
+<script type="text/javascript">
+	var outerHTML = div.outerHTML;
+	console.log(outerHTML);
+
+	div.outerHTML = "<p style=\"color: red;\">你是我的小苹果！</p>";
+</script>
+支持outerHTML的浏览器有：IE4+、Safari4+、Chrome、Opera8+、Firefox8+。
+
+3. insertAdjacentHTML()方法
+接收两个参数：插入位置和要插入的HTML文本。
+第一个参数必须是下列值之一：
+· "beforebegin"：在当前元素之前插入一个紧邻的同辈元素。
+· "afterbegin"：在当前元素之下插入一个新的子元素或在第一个子元素之前再插入新的子元素；
+· "beforeend"：在当前元素之下插入一个新的子元素或在最后一个子元素之后再插入新的子元素；
+· "afterend"：在当前元素之后插入一个紧邻的同辈元素。
+这些值必须是小写形式！！！
+<div id="insert">
+	<ul id="myList">
+		<li>床前明月光</li>
+		<li>疑是地上霜</li>
+		<li>举头望明月</li>
+		<li>低头思故乡</li>
+	</ul>
+</div>
+<script type="text/javascript">
+	var myList = document.getElementById("myList");
+	myList.insertAdjacentHTML("beforebegin", "<h2>静夜思</h2>");
+	myList.insertAdjacentHTML("afterend", "<p>李太白</p>");
+	myList.insertAdjacentHTML("afterbegin", "<li>夜半时分，难以入睡，打开窗子，外天空挂着一轮皎洁的明月。它在我的床前洒下了一片光，如这秋夜的白霜般清清凉凉。</li>");
+	myList.insertAdjacentHTML("beforeend", "<li>望着那远在天空中无法触摸的明月，再也忍不住内心的思念，思念那远在天边的家乡，家中的亲人此刻不知是否也在思念着我。</li>");
+
+	var insert = document.getElementById("insert");
+	console.log(insert.outerHTML);
+</script>
+支持insertAdjacentHTML()的浏览器有IE、Firefox8+、Safari、Opera和Chrome。
+
+4. 内存与性能问题
+在删除带有事件处理程序或引用了其他JavaScript对象子树时，就有可能导致内存占用问题。因此，在使用innerHTML、outerHTML属性和insertAdjacent()方法时，最好先手工删除要被替换的元素的所有事件处理程序和JavaScript对象属性。
+在设置innerHTML或outerHTML时，会创建一个HTML解析器，这个解析器是在浏览器级别的代码基础上运行的，因此比执行JavaScript快得多。不可避免的，创建和销毁HTML解析器也会带来性能损失，所以最好能够将设置innerHTML或outerHTML的次数控制在合理的范围内。
+
+
+11.3.7 scrollIntoView()方法
+scrollIntoView()可以在所有HTML元素上调用，通过滚动浏览器窗口或某个容器元素，调用元素就可以出现在视口中。
+可以不传入参数，或传入true|false作为参数。
+<div id="scrollDiv" style="width: 200px; height: 200px; background: blue;"></div>
+<script type="text/javascript">
+	var scrollDiv = document.getElementById("scrollDiv");
+	scrollDiv.scrollIntoView();
+</script>
+支持scrollIntoView()方法的浏览器有：IE、Safari、Firefox和Opera。
+
+
+
+</body>
+</html>  

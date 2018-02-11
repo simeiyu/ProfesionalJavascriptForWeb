@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>事件处理程序 -  事件</title>
+</head>
+<body>
+事件就是用户或浏览器自身执行的某种动作。诸如click、load和mouseover，都是事件的名字。
+而响应某个事件的函数就叫做事件处理程序（或事件侦听器）。事件处理程序的名字以“on”开头，因此click事件的事件处理程序就是onclick，load事件的事件处理程序就是onload。
+
+为事件指定处理程序的方式有好几种：
+13.2.1 HTML事件处理程序
+<input type="button" name="click" value="Click Me" onclick="alert('Clicked!');">
+<br>
+<input type="button" name="click1" value="Click Me" onclick="showMessage();">
+<script type="text/javascript">
+	function showMessage () {
+		alert("Hello World!");
+	}
+</script>
+
+<br>
+通过event变量可以直接访问事件对象，不用自己定义它，也不用从函数的参数列表中读取。
+<input type="button" name="click" value="Click Me" onclick="alert(event.type);">
+<br>
+this值等于事件的目标元素。
+<input type="button" name="click" value="Click Me" onclick="alert(this.value);">
+
+关于这个动态创建的函数，另一个有意思的地方是它扩展作用域的方式。
+在这个函数内部，可以像访问局部变量一样访问document及该元素本身的成员。
+<form method="post">
+	<input type="text" name="username" value="">
+	<input type="button" value="Echo Username" onclick="alert(username.value)">
+</form>
+
+在HTML中指定事件处理程序有两个缺点：
+1.存在时差问题。
+2.扩展事件处理程序作用域在不同浏览器中会导致结果不同。
+3.HTML和JavaScript代码紧密耦合。
+
+
+13.2.2 DOM0级事件处理程序
+每个元素（包括window和document）都有自己的事件处理程序属性，这些属性通常全部小写，如onclick。
+将这种属性的值设置为一个函数，就可以指定事件处理程序。
+
+要使用JavaScript指定事件处理程序，首先必须取得一个要操作的对象的引用。
+使用DOM0级方法指定的事件处理程序被认为是元素的方法。因此这时候的事件处理程序是在元素的作用域中运行；换句话说，程序中的this引用当前元素。
+以这种方式添加的事件处理程序会在事件的冒泡流中阶段被处理。
+<input type="button" name="btn" id="btn" value="DOM0级事件处理程序">
+<script type="text/javascript">
+	var btn = document.getElementById("btn");
+	btn.onclick = function () {
+		alert(this.id);
+	};
+
+	// btn.onclick = null;  // 删除事件处理程序
+</script>
+也可以删除通过DOM0级方法指定的事件处理程序，只要将事件处理程序属性值设置为null即可。
+
+
+13.2.3 DOM2级事件处理程序
+“DOM2级事件”定义了两个方法，用于处理指定和删除事件处理程序的操作：addEventListener()和removeEventListener()。
+所有DOM节点中都包含这两个方法，并且他们都接受三个参数：
+要处理的事件名、作为事件处理程序的函数和一个布尔值。
+最后这个布尔值参数如果是true，表示在捕获阶段调用事件处理程序；如果是false，表示在冒泡阶段调用事件处理程序。
+
+DOM2级方法的事件处理程序和DOM0一样，也是在其依附的元素作用域中运行。
+使用DOM2级方法添加事件处理程序的主要好处是可以添加多个事件处理程序。
+<br>
+<input type="button" name="myBtn" id="myBtn" value="DOM0级事件处理程序">
+<script type="text/javascript">
+	var myBtn = document.getElementById("myBtn");
+	myBtn.addEventListener("click", function(){
+		alert("event.id");
+	}, false);
+	myBtn.addEventListener("click",function(){
+		console.log(this.value);
+	}, false);
+</script>
+
+通过addEventListener()添加的事件处理程序只能使用removeEventListener()方法移除，移除时传入的参数与添加事件处理程序时使用的参数相同。
+这意味着使用addEventListener()添加的匿名函数将无法被移除。
+<br>
+<h2><a href="#" id="removeEvent">移除事件处理函数</a></h2>
+<script type="text/javascript">
+	var removeEvent = document.getElementById("removeEvent");
+	removeEvent.addEventListener("mouseover", redColor, false);
+	function redColor () {
+		this.style = "color: red;";
+	}
+	// removeEvent.removeEventListener("mouseover", redColor, false);
+</script>
+
+
+大多数情况下，都是将事件处理程序添加到事件流的冒泡阶段，这样可以最大限度的兼容各种浏览器。
+
+IE9、Chrome、Firefox、Safari和Opera支持DOM2级事件处理程序
+
+
+13.2.4 IE事件处理程序
+IE实现了与DOM 中类似的两个方法：attachEvent()和detachEvent()。
+这两个方法接受相同的下两个参数：事件处理程序名称和事件初恋程序函数。
+由于IE8及更早版本只支持事件冒泡，所以通过attachEvent()添加的事件处理程序都会被添加到冒泡阶段。
+
+在IE中使用attachEvent()与使用DOM0级方法的主要区别在于事件处理程序的作用域。
+在使用DOM0级的情况下，事件处理程序会在其所属元素的作用域内运行；
+在使用attachEvent()方法的情况下，事件处理程序会在全局作用域中运行，因此this等于window。
+<button type="button" id="ieEvent">attachEvent</button>
+<script type="text/javascript">
+	var ieEvent = document.getElementById("ieEvent");
+	console.log(ieEvent.tagName);
+	// 与DOM方法不同，这些事件不是以添加它们的顺序执行，而是以相反的顺序被触发。
+	ieEvent.attachEvent("onclick", function () {
+		alert("Clicked!");
+	});
+	ieEvent.attachEvent("onclick", function () {
+		alert(this === window);
+	});
+	// 对象不支持“attachEvent”属性或方法。......咋回事？？？？
+	// IE11开始不再支持attachEvent等非标准IE专有属性和方法
+</script>
+使用attachEvent()添加的事件可以通过detachEvent()来移除，条件是必须提供相同的参数。与DOM方法一样，也意味着添加的匿名函数将不能被移除。
+
+支持ＩＥ事件处理程序的浏览器有ＩＥ和Opera。
+
+
+13.2.5 跨浏览器的事件处理程序
+<script>
+	var EventUtil = {
+		addHandler: function(element, type, handler){
+			if (element.addEventListener) {
+				element.addEventListener(type, handler, false);
+			} else if (element.attachEvent) {
+				element.attachEvent("on" + type, handler);
+			} else {
+				element["on" + type] = handler;
+			}
+		},
+		removeHandler: function(element, type, handler){
+			if (element.removeEventListener) {
+				element.removeEventListener(type, handler, false);
+			} else if (element.attachEvent) {
+				element.detachEvent("on" + type, handler);
+			} else {
+				element["on" + type] = null;
+			}
+		}
+	}
+</script>
+<div id="myDiv">黑豆黑黑黑...</div>
+<script type="text/javascript">
+	var myDiv = document.getElementById("myDiv");
+	function owncss () {
+		this.style = "height: 120px; background-color: pink; line-height: 120px; text-align: center; transition: all .4s ease;";
+	}
+	EventUtil.addHandler(myDiv, "click", owncss);
+</script>
+
+
+</body>
+</html> 

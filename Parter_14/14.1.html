@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>表单的基础知识 - 表单脚本</title>
+</head>
+<body>
+在JavaScript中，表单对应的是HTMLFormElement类型。
+HTMLFormElement继承了HTMLElement，另外也有自己的属性和方法。
+
+· acceptCharset：服务器能够处理的字符集；等价于HTML中的accept-charset特性。  
+<!-- accept-charset特性规定服务器用那种字符集处理表单数据 -->
+· action：接受请求的URL；等价于HTML中的action特性。
+· elements：表单中所有控件的集合（HTMLCollection）。
+· enctype：请求的编码类型；等价于HTML中的enctype特性。
+<!-- enctype特性规定在表单发送到服务器之前应该如何对表单数据进行编码 -->
+· length：表单中控件的数量。
+· method：要发送的HTTP请求类型，通常是“get”或“post”；等价于HTML的method属性。
+· name：；
+· reset()：；
+· submit()：；
+· target：用于发送请求和接收响应的窗口的名称；等价于HTML中的target特性。
+<fieldset>
+	<legend>表单一</legend>
+	<form id="form_1" name="myForm" method="post" action="#">
+		<div>
+			<label for="username">用户名：</label>
+			<input type="text" name="username" autofocus>
+		</div>
+		<div>
+			<label for="password">密码：</label>
+			<input type="password" name="password">
+		</div>
+		<div>
+			<input type="submit" name="submit" value="提交">
+		</div>
+	</form>
+</fieldset>
+取得form元素引用的方式有好几种：
+<script type="text/javascript">
+	// 1、用id
+	var form = document.getElementById("form_1");
+
+	// 2、通过document.forms可以取得页面中所有的表单，在这个集合中通过数值索引或name值来取得特定的表单。
+	var form_1 = document.forms[0];
+	var myForm = document.forms["myForm"];
+
+	// 阻止表单提交
+	form.addEventListener("submit", function(event){
+		event.preventDefault();
+	}, false);
+
+	// submit()方法调用
+	// form.submit();
+</script>
+
+
+-----------------------------------
+14.1.1 提交表单
+单击[提交按钮]或[图像按钮]时，就会提交表单。
+提交按钮：使用input或button元素并将其type特性值设置为submit。
+图像按钮：使用input元素并将type特性值设为image。
+在以上表单控件拥有焦点的情况下，按回车键就可以提交表单。
+
+以这种方式提交表单时，浏览器会在请求发送给服务器之前触发submit事件。这样我们就有机会验证表单数据，并据以决定是否允许表单提交。
+
+在JavaScript中，调用submit()方法也可以调用表单，而且无需表单包含提交按钮。
+
+提交表单可能出现的最大问题：重复提交表单。
+解决方法：1、第一次提交表单后就禁用提交按钮；2、利用onsubmit事件处理程序取消后续的表单提交操作。
+
+---------------------------
+14.1.2 重置表单
+重置按钮：input或button元素的type特性值为reset。
+用户单击重置按钮时，会触发reset事件。利用这个机会可以在必要时取消重置操作。
+也可以通过reset()方法来重置表单。
+相应代码同提交表单。
+
+--------------------
+14.1.3 表单字段
+elements属性是一个有序列表，包含表单中所有字段。每个表单字段在elements集合中的顺序，与他们出现在标记中的顺序相同。可以按照位置和name特性来访问他们。
+<script type="text/javascript">
+	var field1 = form.elements[1].name;
+	console.log(field1);     // password
+	console.log(form.length);     // 3
+	console.log(form.elements.length);   // 3
+</script>
+1、共有的表单字段属性
+表单字段共有的属性和方法如下：
+· disabled：布尔值，表示当前字段是否被禁用。
+· form：指向当前字段所属表单的指针；只读。
+· name：当前字段的名称。
+· readOnly：布尔值，表示当前字段是否只读。
+· tabIndex：表示当前字段的切换（tab）序号。
+· type：当前字段的类型，如radio、text等。
+· value：当前字段将被提交给服务器的值。
+除form属性外，可以通过JavaScript动态修改其他任何属性。
+
+避免多次提交表单：侦听submit事件，并在该事件发生时禁用提交按钮：
+<script type="text/javascript">
+	form.addEventListener("submit", function(event){
+		var target = event.target;
+		// 取得提交按钮
+		var btn = target.elements["submit"];
+		// 禁用提交按钮
+		btn.disabled = true;
+		console.log(event.type);
+		console.log(target.name);
+		console.log(btn.disabled);
+		alert(event.type + "；" + target.name + "；" + btn.disabled);
+	}, false);
+</script>
+
+2、共有的表单字段方法
+每个表单字段都有两个方法：focus()和blur()。
+<script type="text/javascript">
+	window.addEventListener("load", function(event) {
+		// 取得第一个表单的第一个字段
+		var element = document.forms[0].elements[0];
+		// 先检测是否设置了autofocus属性
+		if (element.autofocus !== "true") {
+			// 没有设置autofocus属性则调用focus方法
+			element.focus();
+			console.log("JS Focus");
+		}
+	}, false);
+</script>
+HTML5为表单新增了一个autofocus属性，autofocus是一个布尔值属性，在支持的浏览器中它的值应该是true。在不支持的浏览器中它的值将是空字符串。
+
+3、共有的表单字段事件
+除了支持鼠标、键盘、更改和HTML事件之外，所有表单都支持下列3个事件：
+· blur:当前字段失去焦点时触发。
+· change: 对于Input和textarea元素，在它们失去焦点且value值改变时触发；对于select元素，在其选项改变时触发。
+· focus：当前字段获得焦点时触发。
+
+
+</body>
+</html> 

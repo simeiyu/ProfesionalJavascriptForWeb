@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>表单序列号 - 表单脚本</title>
+</head>
+<body>
+随着Ajax的出现，表单序列化已经成为一种常见需求。
+<script type="text/javascript">
+	function serialize(form) {
+		var parts = [],
+			i,
+			j,
+			field = null;
+			len = form.elements.length,
+			optLen,
+			option,
+			optValue;
+		for (i = 0; i < len; i++) {
+			field = form.elements[i];
+			switch (field.type) {
+				case "select-one":
+				case "select-multiple":
+					if (field.name.length) {
+						for (j=0, optLen=field.options.length; j<optLen; j++) {
+							option = field.options[j];
+							if (option.selected) {
+								optValue = "";
+								// element.hasAttribute()方法，如果元素拥有指定属性，则返回true,否则返回false。
+								// hasAttribute()为DOM2级方法，IE8及之前版本不支持。
+								if (option.hasAttribute) {
+									optValue = (option.hasAttribute("value") ? option.value : option.text);
+								} else {
+									// element.attributes属性，获得元素属性的集合，即NamedNodeMap。
+									// attr.specified查明是否已规定某个属性；如果已指定属性则返回true，否则返回false。（DOM1级属性）
+									optValue = (option.attributes["value"].specified ? option.value : option.text);
+								}
+								parts.push(encodeURIComponent(option.name) + "=" + encodeURIComponent(optValue));
+							}
+						}
+					}
+					break;
+				// 如果表单中包含fieldset元素，则该元素会出现在元素集合中，但没有type属性。
+				// 因此，如果type属性未定义，则不需要对其进行序列化。
+				// 同样，对应各种按钮及文件输入字段也是如此。
+				case undefined:
+				case "file":
+				case "submit":
+				case "reset":
+				case "button":
+					break;
+				case "radio":
+				case "checkbox":
+					if (!field.checked) {
+						break;
+					}
+					/* 执行默认操作（如果checked属性为true，则继续执行default语句） */
+				default:
+					// 不包含没有名字的表单字段
+					if (field.name.length) {
+						parts.push(encodeURIComponent(field.name) + "=" + encodeURIComponent(field.value));
+					}
+			}
+		}
+		// 以查询字符串的格式输出序列化之后的字符串
+		return parts.join("&");
+	}
+</script>
+
+
+
+
+
+</body>
+</html>  

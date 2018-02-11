@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>专有扩展-DOM扩展</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+</head>
+<body>
+14.4.1 文档模式
+IE8引入了一个新的概念，叫“文档模式”（document mode）。页面的文档模式决定了可以使用什么功能。
+到了IE9，总共有以下四种文档模式：
+· IE5，以混杂模式渲染页面（IE5的默认模式就是混杂模式）。ＩＥ８及更高版本中的新功能都无法使用。
+· IE7，以IE7标准模式渲染页面。IE8及更高版本中的新功能都无法使用。
+· IE8，以IE8标准模式渲染页面。ＩＥ８中的新功能都可以使用，因此可以使用Selectors API、更多CSS2级选择符和某些CSS3功能，还有一些HTML5的功能。
+· IE9，以IE9标准模式渲染页面。IE9中的新功能都可以使用，比如ECMAScript5、完整的CSS3及更多HTML5功能。
+要强制浏览器以某种模式渲染页面，可以使用HTTP头部信息X-UA-Compatible，或通过等价的meta标签来表示：
+<!-- \<meta http-equiv="X-UA-Compatible" content="IE=IEVersion">\ -->
+通过document.documentMode属性可以知道给定页面使用的是什么文档模式。这个属性是IE8新增的，它会返回使用的文档模式的版本号。
+<script type="text/javascript">
+	console.log(document.documentMode); // 怎么是undefine呢？？？
+</script>
+
+
+11.4.2 children属性
+这个属性是HTMLCollection的实例，只包含元素中同样还是元素的子节点。除此之外，children属性和childNodes属性没有什么区别。
+<div class="myDiv">
+	这是谁写的来着？？？
+	<ul>
+		<li>千山鸟飞绝</li>
+		<li>万径人踪灭</li>
+		<li>孤舟雪笠翁</li>
+		<li>独钓寒江雪</li>
+	</ul>
+</div>
+<script type="text/javascript">
+	var myDiv = document.querySelector(".myDiv");
+	var len = myDiv.children.length;
+	var firstChild = myDiv.children[0];
+	console.log(len);   // 1
+	console.log(firstChild.innerText); 
+</script>
+支持children属性的浏览器包括IE5、Safari3、Firefox3.5、Opera8和Chrome。
+IE8及之前的版本会包含注释节点，IE9之后的版本则只返回元素节点。
+
+
+11.4.3 contains()方法
+调用contains()方法的应该是一个祖先节点，也就是搜索开始的节点。
+这个方法接收一个参数，即要检测的后代节点。
+如果被检测的节点是后代节点，该方法返回true；否则，返回false。
+<script type="text/javascript">
+	console.log(document.documentElement.contains(document.body));  // true
+</script>
+支持contains()方法的浏览器有：IE、Firefox9+、Safari、Chrome和Opera。
+
+使用DOM Level 3的compareDocumentPosition()也能够确定节点间的关系。支持这个方法的浏览器有：
+IE9+、Firefox、Opera9.5+、Safari和Chrome。
+这个方法返回一个表示两个节点间位置关系的位掩码（bitmask）。
+位掩码的值及其节点关系如下：
+· 1：无关；
+· 2：居前；
+· 4：居后；
+· 8：包含；
+· 16：被包含。
+<script type="text/javascript">
+	var result = document.documentElement.compareDocumentPosition(document.body);
+	console.log(!!(result & 16));  // true
+	console.log(result);       // 20
+	console.log(result & 16);  // 16
+	console.log(result & 8);   // 0
+	console.log(result & 4);   // 4
+	console.log(result & 2);   // 0
+	console.log(result & 1);   // 0
+</script>
+使用一些浏览器及能力检测，就可以写出一个如下所示的通用的contains函数：
+<script type="text/javascript">
+	function contains(refNode, otherNode){
+		if (typeof refNode.contains == "function" && (!client.engine.webkit || client.engine.webkit >= 522)) {  // 方法存在，并且不是webkit引擎浏览器或者webkit版本高于522
+			return refNode.contains(otherNode);
+		} else if (typeof refNode.compareDocumentPosition == "function") {
+			return !!(refNode.compareDocumentPosition(otherNode) & 16);
+		} else {
+			var node = otherNode.parentNode;
+			do {
+				if (node === refNode) {
+					return true;
+				} else {
+					node = node.parentNode;
+				}
+			} while (node !== null)
+
+			return false;
+		}
+	}
+</script>
+
+
+11.4.4 插入文本
+1. innerText属性
+通过innerText属性可以操作元素中包含的所有文本内容，包括子文档树中的文本。
+在读取时，它会按照由浅入深的顺序，将子文档树中的所有文本拼接起来。
+在写入时，它会删除元素的所有子节点，插入包含相应文本值的文本节点。
+示例见第40行。
+-----------
+利用innerText可以过滤掉HTML标签。
+<script type="text/javascript">
+	myDiv.innerText = myDiv.innerText;
+</script>
+支持innerText属性的浏览器包括IE4+、Safari3+、Opera8+和Chrome。
+Firefox虽然不支持innerText，但支持作用类似的textContent属性。
+textContent是DOM Level 3规定的一个属性，其他支持textContent属性的浏览器还有：IE9+、Safari3+、Opera10+和Chrome。
+为了确保跨浏览器兼容性，可以编写一个类似下面的函数来检测可以使用哪个属性：
+<script type="text/javascript">
+	function getInnerText(element){
+		return (typeof element.textContent == "string") ? element.textContent : element.innerText;
+	}
+
+	function setInnerText(element, text){
+		if (typeof element.textContent == "string") {
+			element.textContent = text;
+		} else {
+			element.innerText = text;
+		}
+	}
+
+	// 调用
+	console.log(getInnerText(myDiv));
+	setInnerText(myDiv, "大王，大王，大王叫我来<strong>巡山</strong>");
+</script>
+innerText属性与textContent属性的不同，见教程P303。
+
+2. outerText属性
+作用范围扩大到了包含调用它的元素之外。
+在读取模式下，outerText与innerText的结果一样。
+在写模式下，outerText会替换整个元素（包括子节点）。
+<script type="text/javascript">
+	console.log(myDiv.outerText);
+	myDiv.outerText = "----------我不想我不想我不想长大！-----------";
+</script>
+支持outerText的浏览器有：IE4+、Safari3+、Opera8+和Chrome。
+这个属性会导致调用它的元素不存在，因此不常用，也不建议用。
+
+
+11.4.5 滚动
+除了HTML5规范的scrollIntoView()，还有几个其他专有方法可以在不同的浏览器中使用。
+· scrollIntoViewIfNeeded(alginCenter)：在当前元素在视口中不可见的情况下，滚动浏览器窗口或元素，使其可见。
+· scrollByLines(lineCount)：将元素的内容滚动指定的行高。
+· scrollByPages(pageCount)：将元素的内容滚动指定的页面高度。
+scrollIntoView()是所有浏览器都支持的方法，因此最常用。
+
+</body>
+</html>  

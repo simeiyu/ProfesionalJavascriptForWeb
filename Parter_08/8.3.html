@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>navigator对象-BOM</title>
+</head>
+<body>
+navigator对象是识别客户端浏览器的事实标准。
+与其他BOM对象的情况一样，navigator对象也有一套自己的属性。这些属性用于检测显示网页的浏览器类型。
+
+8.3.1 检测插件
+检测浏览器中是否安装了特定的插件，是一种最常见的检测例程。
+对于非IE浏览器，可以使用plugins数组来达到这个目的。该数组中的每一项都包含下列属性：
+· name：插件的名字。
+· description：插件的描述。
+· filename：插件的文件名。
+· length：所处理的MIME类型数量。
+在检测插件时，需要循环迭代每个插件，并将插件的name与给定的名字进行比较。
+<script type="text/javascript">
+	// 插件检测（在IE中无效）
+	function hasPlugin(name){
+		name = name.toLowerCase();
+		for(var i=0; i<navigator.plugins.length; i++){
+			if (navigator.plugins[i].name.toLowerCase().indexOf(name) > -1) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// 检测flash
+	console.log(hasPlugin("flash"));
+	// 检测quickTime
+	console.log(hasPlugin("quickTime"));
+
+	// 尝试执行
+	for(var prop in navigator.plugins){
+		console.log(prop);
+		console.log(navigator.plugins[prop]);
+	}	
+</script>
+在Firefox、Opera、Safari、Chrome中可以用这种方法来检测插件。
+
+在ＩＥ中检测插件的唯一方式就是使用专有的ActiveXObject类型，并尝试创建一个特定插件的实例。
+IE是以COM对象的方式实现插件的，而COM对象使用唯一标识符来标识。因此，要想检查特定的插件，就必须知道其COM标识符。
+知道唯一标识符之后，就可以编写类似下面的函数来检测IE中是否安装相应插件了。
+<script>
+	// 检测IE中的插件
+	function hasIEPlugin(name){
+		try {
+			new ActiveXObject(name);
+			return true;
+		} catch (ex) {
+			return false;
+		}
+	}
+
+	// 检测flash
+	console.log(hasIEPlugin("ShockwaveFlash.ShockwaveFlash"));
+</script>
+
+鉴于检测这两种插件的方式差别太大，因此典型的做法是针对每个插件分别创建检测函数，而不是使用上面介绍的通用的方法。
+<script>
+	// 检测所有浏览器中的flash
+	function hasFlash(){
+		var result = hasPlugin("Flash");
+		if (!result) {
+			result = hasIEPlugin("ShockwaveFlash.ShockwaveFlash");
+		}
+		return result;
+	}
+
+	// 检测所有浏览器中的_uickTime
+	function has_uickTime(){
+		var result = hasPlugin("_uickTime");
+		if (!result) {
+			result = hasIEPlugin("_uickTime._uickTime");
+		}
+		return result;
+	}
+
+	// 检测flash
+	console.log(hasFlash());
+	// 检测_uickTime
+	console.log(has_uickTime());
+</script>
+
+
+8.3.2 注册处理程序
+Firefox 2 为navigator对象新增了registerContentHandle()和registerProtocolHandle()方法。
+这两个方法可以让一个站点指明它可以处理特定类型的信息。
+随着RSS阅读器和在线电子邮件程序的兴起，注册处理程序就为像使用桌面应用程序一样默认使用这些在线应用程序提供了一种方式。
+
+registerContentHandle()方法接收三个参数：
+要处理的MIME类型、可以处理该MIME类型的页面的URL以及应用程序的名称。
+将一个站点注册为处理RSS源的处理程序，可以使用如下代码：
+<script>
+	navigator.registerContentHandle("application/rss+xml", "http://www.somereader.com?feed=%s", "Some Reader");
+</script>
+第一个参数是RSS源的MIME类型。第二个参数是应该接收RSS源的ＵＲＬ的URL，其中的%s表示RSS源的URL，由浏览自动插入。
+
+registerProtocolHandle()方法也接收三个参数：
+要处理的协议（例如，mailto或ftp）、处理该协议的页面的URL和应用程序的名称。
+将一个应用程序注册为默认的邮件客户端，可以使用如下代码：
+<script>
+	navigator.registerProtocolHandle("mailto", "http://www.somemailclient.com?cmd=%s", "Some Mail Client");
+</script>
+第二个参数是处理相应ingiu的URL，%s表示原始的请求。
+</body>
+</html>

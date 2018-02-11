@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>单体内置对象-引用类型-JavaScript高级程序设计</title>
+</head>
+<body>
+什么是内置对象？
+由ECMAScript实现提供的，不依赖于宿主环境的对象，这些在ECMAScript执行之前就已经存在了。
+如Object、Array、String等。
+-------------------------------
+ES还定义了两个单体内置对象：Global、Math。
+
+
+5.7.1 Global全局对象
+在全局作用域中定义的属性和函数，都是Global对象的属性。
+如isNaN()、isFinite()、parseInt()、parseFloat()等。
+除此之外，Global对象还包含其他一些方法。
+--------------------------------
+1.URI编码方法
+encodeURI()编码后的结果是除了空格之外的其他字符都原封不动，只有空格被替换成了20%。
+encodeURIComponent()方法则会使用对应的编码替换所有的非字母数字字符。
+<script type="text/javascript">
+	var uri = "http://www.wrox.com/illegal value.htm#start";
+	console.log(encodeURI(uri));
+	console.log(encodeURIComponent(uri));
+</script>
+
+解码方法：
+decodeURI()对应encodeURI()
+decodeURIComponent()对应encodeURIComponent()
+<script type="text/javascript">
+	var code1 = "http://www.wrox.com/illegal%20value.htm#start";
+	var code2 = "http%3A%2F%2Fwww.wrox.com%2Fillegal%20value.htm%23start";
+	console.log(decodeURI(code1));
+	console.log(decodeURI(code2));
+	console.log(decodeURIComponent(code1));
+	console.log(decodeURIComponent(code2));
+</script>
+
+2.eval()方法
+eval()方法就像一个完整的ECMAScript解析器。
+它只接收一个参数，即要执行的ECMAScript或Javascript字符串。
+
+3.Global对象的属性
+
+4.window对象
+Web浏览器将Global对象作为Window对象的一部分加以实现。
+另一种取得Global对象的方法是使用以下代码：
+<script type="text/javascript">
+	var global = function(){
+		return this;
+	}();
+	console.log(global);
+</script>
+
+
+5.7.2 Math对象
+ECMAScript为保存数学公式和信息提供了一个公共位置，即Math对象。
+
+1.Math的属性
+<script type="text/javascript">
+	console.log(Math.E);
+	console.log(Math.LN10);
+	console.log(Math.LN2);
+	console.log(Math.LOG2E);
+	console.log(Math.LOG10E);
+	console.log(Math.PI);
+	console.log(Math.SQRT1_2);
+	console.log(Math.SQRT2);
+</script>
+
+2.min()和max()方法
+用于确定一组数值中的最大值和最小值
+<script type="text/javascript">
+	console.log(Math.min(13, 25, 6, 58));
+	console.log(Math.max(13, 25, 6, 58));
+</script>
+要找到数组中的最大值和最小值，可以用apply()方法：
+<script type="text/javascript">
+	var myArray = [1,8,50,32,4,99];
+	var min = Math.min.apply(Math, myArray);
+	var max = Math.max.apply(Math, myArray);
+	console.log(min);
+	console.log(max);
+	// console.log(Math.max(myArray));  返回NaN
+</script>
+
+3.舍入方法
+Math.ceil()向上舍入；
+Math.floor()向下舍入；
+Math.round()标准舍入。
+<script type="text/javascript">
+	var num = 35.6;
+	console.log(Math.ceil(num));
+	console.log(Math.floor(num));
+	console.log(Math.round(num));
+
+	console.log("-----------------")
+</script>
+
+4.random()方法；返回一个1~0之间的随机数，不包括0和1。
+<script type="text/javascript">
+	console.log(Math.random());
+	console.log(Math.random());
+	console.log(Math.random());
+
+	var rand = Math.random();
+	var myNum = Math.floor(rand * 10);
+	console.log(myNum);
+</script>
+<script type="text/javascript">
+	console.log("----返回随机数的函数-------------");
+
+	function selectForm (lowerValue, upperValue) {
+		var choices = upperValue - lowerValue + 1;
+		return Math.floor(Math.random() * choices + lowerValue);
+	}
+
+	var num = selectForm(2,10); // 返回2-10之间的一个数。
+	console.log(num);
+
+	var num = selectForm(4, 6); // 返回2-10之间的一个数。
+	console.log(num);
+
+	var colors = ['red', 'green', 'yellow', 'orange', 'blue', 'black', 'white', 'brown', 'pink', 'purple'];
+	var color = colors[selectForm(0, colors.length - 1)];
+	console.log(color);
+</script>
+
+5.其他方法
+
+
+
+
+</body>
+</html>

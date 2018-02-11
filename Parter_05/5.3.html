@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Date类型-引用类型-JavaScript高级程序设计</title>
+</head>
+<body>
+<script type="text/javascript">
+	var now = new Date();
+	console.log(now);
+
+	var someDate = new Date(Date.parse("6/9/2016"));
+	console.log(someDate);
+	var someDate2 = new Date(Date.UTC(2016, 5, 9));
+	console.log(someDate2);
+
+	var UUBirtday = new Date("7/9/2016 14:35");
+	console.log(UUBirtday);
+
+	var UUBirtday2 = new Date(2016, 6, 9, 14, 35);
+	console.log(UUBirtday2);
+</script>
+
+5.3.1 继承的方法
+<script type="text/javascript">
+	console.log("------------继承的方法------------");
+	var MMBirthday = new Date("7/10/1986");
+	if (MMBirthday < UUBirtday) {
+		console.log("MM的生日比UU的大。")
+	} else {
+		console.log("MM的生日比UU的小。")
+	}
+	console.log(MMBirthday.valueOf());
+</script>
+Date类型的valueOf方法，返回日期的毫秒表示。
+
+<hr>
+5.3.2 日期格式化方法
+<script type="text/javascript">
+	console.log("------------日期格式化方法------------");
+	console.log(UUBirtday.toDateString());
+	console.log(UUBirtday.toTimeString());
+	console.log(UUBirtday.toLocaleDateString());
+	console.log(UUBirtday.toLocaleTimeString());
+	console.log(UUBirtday.toUTCString());
+	console.log(UUBirtday.toString());
+	console.log(UUBirtday.toLocaleString());
+</script>
+
+<hr>
+5.3.3 日期/时间组件方法
+<script type="text/javascript">
+	console.log("------------日期/时间组件方法------------");
+	var date = new Date();
+	console.log(date);
+	console.log(date.toLocaleString());
+	console.log(date.toString());
+	console.log(date.toUTCString());
+	console.log(date.getTime());
+	console.log(date.getDate());
+	console.log(date.getFullYear());
+	console.log(date.getUTCFullYear());
+	console.log(date.getMonth());
+	console.log(date.getDay());
+	console.log(date.getHours());
+	console.log(date.getMinutes());
+	console.log(date.getSeconds());
+	console.log(date.getMilliseconds());
+	console.log(date.getTimezoneOffset());
+</script>
+
+
+
+
+
+</body>
+</html>

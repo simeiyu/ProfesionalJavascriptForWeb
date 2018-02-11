@@ -1,0 +1,360 @@
+/*
+ * @Author: SiMeiyu 
+ * @Date: 2017-07-04 09:50:18 
+ * @Last Modified by:   SiMeiyu 
+ * @Last Modified time: 2017-07-04 09:50:18 
+ */
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>基本包装类型-引用类型-JavaScript高级程序设计</title>
+</head>
+<body>
+为了便于操作基本类型值，ECMAScript 提供了3个特殊的引用类型：Boolean、Number、String。
+每当读取一个基本类型值的时候，后台就会创建一个对应的基本包装类型的对象，从而让我们能够调用一些方法来操作这些数据。
+<script type="text/javascript">
+	var s1 = "some text";
+	var s2 = s1.substring(2);
+	console.log(s2);
+</script>
+------------------------
+引用类型和基本包装类型的主要区别：对象的生存期。
+使用new操作符创建的引用类型的实例，在执行流离开当前作用域之前都一直保存在内存中。
+自动创建的基本包装类型的对象，只存在与一行代码的执行瞬间，然后立即被销毁。这意味着我们不能在运行时为基本类型值添加属性和方法。
+<script type="text/javascript">
+	var s1 = "some text";
+	s1.color = "orange";
+	console.log(s1.color); // 返回undefined
+</script>
+
+<hr>
+5.6.1 Boolean 类型
+Boolean类型是与布尔值对应的引用类型。
+<script type="text/javascript">
+	console.log("----Boolean类型--------");
+	
+	var falseObj = new Boolean(false);
+	var result = falseObj && true;
+	console.log(falseObj);
+	console.log(typeof falseObj);   // 返回object
+	console.log(falseObj instanceof Boolean);    // 返回true
+	console.log(result);  //返回true
+
+	var falseVal = false;
+	var result = falseVal && true;
+	console.log(typeof falseVal);    // 返回boolean
+	console.log(falseVal instanceof Boolean);  // 返回false
+	console.log(result);  // 返回false
+</script>
+建议永远不要使用Boolean对象。
+
+<hr>
+5.6.2 Number 类型
+Number 是与数字值对应的引用类型。
+创建Number对象：
+例子————
+var numberObj = new Number(10);
+-------------------------
+数字格式化为字符串：
+toFixed()按照指定的小数位返回数值的字符串表示。
+<script type="text/javascript">
+	console.log("----Number类型--------");
+	
+	var num = 10;
+	console.log(num.toFixed(2));
+
+	var num = 10.005;
+	console.log(num.toFixed(2));	
+</script>
+
+toExponential()返回以指数表示法表示的数值的字符串形式。
+接收一个参数，该参数指定输出结果中的小数位数。
+<script type="text/javascript">
+	var num = 14140000;
+	console.log(num.toExponential(2));
+
+	var num = 0.0000000005279;
+	console.log(num.toExponential(2));
+</script>
+
+toPrecision()返回数值的最合适格式。
+接收一个参数，表示数值的所有数字位数（不包括指数部分）。
+<script type="text/javascript">
+	var num = 99;
+	console.log(num.toPrecision(1));
+	console.log(num.toPrecision(2));
+	console.log(num.toPrecision(3));
+</script>
+
+<hr>
+5.6.3 String 类型
+String类型是字符串对应的对象包装类型。
+var str = new String("hello word");
+-------------------------------
+String类型的每个实例都有一个length属性，表示字符串中包含多少个字符；
+<script type="text/javascript">
+	console.log("----String类型--------");
+
+	var str = "Hellow World";
+	console.log(str.length);  // 返回12
+
+	var str = "小鸟，你们好";
+	console.log(str.length); // 返回6
+</script>
+
+字符方法：charAt()、charCodeAt()
+charAt()返回字符，charCodeAt()返回字符的字符编码。
+<script type="text/javascript">
+	console.log("----字符方法--------");
+
+	var str = "Hellow World";
+	var strZh = "小鸟，你们好";
+	var result1 = str.charAt(1);
+	var result2 = str.charCodeAt(1);
+	var resultZh1 = strZh.charAt(1);
+	var resultZh2 = strZh.charCodeAt(1);
+
+	console.log(result1);
+	console.log(result2);
+	console.log(resultZh1);
+	console.log(resultZh2);
+
+	console.log(str[0]); // ES5支持方括号加数字索引访问字符串中的字符
+</script>
+
+字符串操作方法：
+concat()将一个或多个字符串拼接起来，返回拼接得到的新字符串。
+“+”加号操作符。
+slice()：接收2个参数，第一个是指定子字符串的开始索引，第二个是指定字符串最后一个字符后面的位置索引。
+* 如果参数是负数，则将传入的负值与字符串长度相加。
+substring()：接收2个参数，第一个是指定子字符串的开始索引，第二个是指定字符串最后一个字符后面的位置索引。
+* 如果参数是负值，则将负值转换为0。
+substr()：接收2个参数，第一个是指定字符串的开始索引，第二个是指定字符串的字符个数。
+* 如果第一个参数是负值，则与字符串长度相加，如果第二个参数是负值，则转为0。
+-----------------------
+<script type="text/javascript">
+	var str1 = "Hello";
+	var str2 = " World";
+
+	console.log("----'+'加号连接字符串--------");
+	console.log(str1 + str2);
+	console.log("Hello" + " World");
+
+	console.log("----concat()方法--------");
+	console.log(str1.concat(str2));
+	console.log(str1.concat(",my Money！"));
+
+	var string_en = "This is a wonderfull day!";
+	var string_cn = "咱们老百姓啊，今儿个真高兴！"
+
+	console.log("----slice()方法--------");
+	console.log(string_en.slice(2, 8));
+	console.log(string_en.slice(2));
+
+	console.log(string_cn.slice(2, 8));
+	console.log(string_cn.slice(2));
+	console.log(string_cn.slice(2, -8));
+
+	console.log("----substring()方法--------");
+	console.log(string_en.substring(2, 8));
+	console.log(string_en.substring(2));
+
+	console.log(string_cn.substring(2, 8));
+	console.log(string_cn.substring(2));
+	console.log(string_cn.substring(2, -8));
+
+	console.log("----substr()方法--------");
+	console.log(string_en.substr(2, 8));
+	console.log(string_en.substr(2));
+
+	console.log(string_cn.substr(2, 8));
+	console.log(string_cn.substr(2));
+	console.log(string_cn.substr(-2, 2));
+	console.log(string_cn.substr(2, -8 ));
+</script>
+
+字符串位置方法：indexOf()、lastIndexOf();
+搜索给定字符串，返回该字符串位置，如果没找到，则返回-1。
+参数：1、要搜索的字符串。
+	  2、（可选）开始搜索的位置。
+<script type="text/javascript">
+	var stringValue = "Hello World";
+	console.log(stringValue.indexOf("l"));  // 返回2
+	console.log(stringValue.lastIndexOf("l"));  // 返回9
+	console.log(stringValue.indexOf("l", 5));  // 返回9
+	console.log(stringValue.lastIndexOf("l", 5));  // 返回3
+	console.log(stringValue.indexOf("f"));
+
+	var myStr = "When I was a little baby, I heard a sound that said How a happaness girl. It was heard likly my dear Mom.";
+	var position = new Array();
+	var pos = myStr.indexOf("a");
+	while (pos > -1) {
+		position.push(pos);
+		pos = myStr.indexOf("a", pos + 1);
+	}
+	console.log(position.toString());
+</script>
+
+trim()方法，创建一个字符串的副本，删除前置和后缀的所有空格，然后返回结果
+<script type="text/javascript">
+	var song = "           　　你是我的小呀小苹果。。。      ";
+	console.log(song.trim());
+</script>
+
+
+字符串大小写匹配方法：
+toUpperCase() 、 toLowerCase()
+toLocaleUpperCase() 、 toLocaleLowerCase()
+-----------------------------------
+<script type="text/javascript">
+	var stringValue = "Go die, go Die!";
+	var upper = stringValue.toUpperCase();
+	var lower = stringValue.toLowerCase();
+	console.log(upper);
+	console.log(lower);
+</script>
+
+
+字符串的模式匹配方法：
+String类型定义了几个用在字符串中匹配模式的方法。
+match()方法，接收一个参数：正则表达式或RegExp对象。
+-------------------------
+<script type="text/javascript">
+	var text = "gocat, bat, sat, fat";
+	var pattern = /.at/g;
+	var match = text.match(pattern);  // 返回一个数组
+	console.log(match.toString());
+	console.log(match.input); // undefined
+	console.log(match.index); // undefined
+	console.log(pattern.source);
+	console.log(pattern.lastIndex);
+	console.log("匹配---》", '/a/b/c'.match(/\//g))
+	console.log("匹配---》", '/a/b/c'.test('/'))
+</script>
+
+search()方法，返回第一个匹配项的索引，如果没有找到匹配项则返回-1。
+接收一个参数：正则表达式或RegExp对象。
+<script type="text/javascript">
+	var search = text.search(pattern);
+	console.log(search);
+</script>
+
+replace()方法，替换字符串。
+参数：1、一个RegExp对象或一个字符串。
+	  2、一个字符串或一个函数。
+如果第一个参数是字符串，那么只会替换第一个子字符串。
+想要替换所有子字符串，必须提供一个正则表达式，而且要指定全局（g）标志。
+如果第二个参数是函数，那么在只有一个匹配项（即与模式匹配的字符串）的情况下，会向这个函数传递三个参数：
+模式的匹配项、模式匹配项在字符串中的位置、原始字符串。
+------------------------------
+<script type="text/javascript">
+	console.log("----replace()方法--------");
+
+	var text = "cat, bat, sat, fat";
+	var result = text.replace("at", "ond");
+	console.log(text);
+	console.log(result);
+
+	var result = text.replace(/at/g, "ond");
+	console.log(result);
+
+	function htmlEscape(text) {
+		return text.replace(/[<>"&]/g, function (match, pos, originalText) {
+			switch (match) {
+				case "<":
+					return "&lt;";
+				case ">":
+					return "&gt;";
+				case "\"":
+					return "&quot;";
+				case "&":
+					return "&amp;";
+			}
+		})
+	}
+	console.log(htmlEscape("<p class=\"greeting\">Hello World!</p>"));
+</script>
+
+split()方法，基于指定的分隔符将一个字符串分割成多个子字符串，并将结果放在一个数组中。
+参数：1、分隔符，可以是字符串，也可以是一个RegExp对象。
+	  2、（可选）用于指定数组大小。
+<script type="text/javascript">
+	console.log("----split()方法--------");
+
+	var json1 = '["周一","周二","周三"]&["东风破","西柏坡"]&["张晓梅","鲁有脚"]';
+	var myJson = json1.split("&");
+	console.log(myJson.toString());
+
+	var date = myJson[0];
+	console.log(typeof date);
+
+	var newDate = date.replace(/[\[\"\]]/g, "");
+	var arrayDate = newDate.split(",");
+
+	console.log(date);
+	console.log(newDate);
+	console.log(arrayDate);
+
+	var date = eval(date);
+	console.log(typeof date);
+	console.log(date);
+	console.log(date[0]);
+	console.log(date.toString());
+
+	var json2 = "[{name: '王二', age: 8}, {name: '青青'}, {name: '飞翔的猪', age: 55}]&[{id: 0, class: 'godis'}, {id: 1, class: 'group'}]";
+	var info = eval(json2.split("&")[0]);
+	for(var i=0; i<3; i++) {
+		console.log(info[i].name);
+	}
+</script>
+
+
+
+localeCompare()方法：比较两个字符串
+--------------------------
+<script type="text/javascript">
+	console.log("----localeCompare()方法--------");
+
+	var stringValue = "yellow";
+	console.log(stringValue.localeCompare("brick"));  // 返回1
+	console.log(stringValue.localeCompare("yellow"));  // 返回0
+	console.log(stringValue.localeCompare("zoo"));  // 返回-1
+
+	// 推荐的结构
+	function determineOrder (value) {
+		var result = stringValue.localeCompare(value);
+		if (result > 0) {
+			console.log(value + "的值比" + stringValue + "小。");
+		} else if (result < 0) {
+			console.log(value + "的值比" + stringValue + "大。");
+		} else {
+			console.log(value + "的值与" + stringValue + "相等。");
+		}
+	}
+	determineOrder("greeting");
+	determineOrder("fish");
+	determineOrder("year");
+	determineOrder("zero");
+	determineOrder("yellow");
+</script>
+
+
+fromCharCode()方法，接收一个或多个字符编码，将它们转换成一个字符串。
+String构造函数本身的静态方法。
+---------------------------------
+<script type="text/javascript">
+	var str = "baby big mouth";
+	var code = null;
+	for (var i = 0; i < str.length; i++) {
+		code = code + str.charCodeAt(i) + ", ";
+	}
+	console.log(code);
+
+	var charC = String.fromCharCode(98, 97, 98, 121, 32, 98, 105, 103, 32, 109, 111, 117, 116, 104);
+	console.log(charC);
+</script>
+
+</body>
+</html>

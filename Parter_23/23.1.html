@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>23.1 离线检测 - 离线应用与客户端存储</title>
+</head>
+
+<body>
+    23.1 离线检测
+    HTML5定义了一个navigator.onLine属性，这个属性值为true表示设备能上网，为false表示设备离线。
+    <script>
+        console.log("离线检测", navigator.onLine);
+    </script>
+
+    由于不同的浏览器存在兼容性差异，单独使用navigator.onLine属性不能确定网络是否连通。
+    即便如此，在请求发生错误的情况下，检测这个属性仍然是管用的。以下是检测属性状态的示例。
+    <script>
+        if (navigator.onLine) {
+            // 正常工作
+        } else {
+            // 离线
+        }
+    </script>
+
+    除了navigator.onLine属性之外，为了更好地确定网络是否可用，HTML5还定义了两个事件：
+    online和offline。
+    当网络从离线变成在线或着从在线变为离线时，分别触发这两个事件。
+    这两个事件在window对象上触发。
+    <script>
+        window.addEventListener("online", function(){
+            console.log("在线");
+        });
+        window.addEventListener("offline", function(){
+            console.log("离线");
+        });
+    </script>
+
+    为了检测应用是否离线，在页面加载后，最好先通过navigation.onLine取得初始的状态。然后就是通过上述两个事件来确定网络连接状态是否变化。
+    当上述事件触发是，navigation.onLine属性的值也会改变，不过必须要手工轮询这个属性才能检测到网络状态的变化。
+
+    支持离线检测的浏览器有IE6+（只支持navigation.onLine属性）、Firefox3、Safari4、Opera10.6、Chrome、iOS3.2版Safari和Android版Webkit。
+
+</body>
+
+</html>

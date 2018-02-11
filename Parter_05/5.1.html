@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Object类型-引用类型-JavaScript高级程序设计</title>
+</head>
+<body>
+引用类型的值（对象）是某个特定引用类型的实例。
+在ECMAScript中，引用类型是一种数据结构，用于将数据和功能组织在一起。描述的是一类对象所具有的属性和方法。
+
+<script type="text/javascript">
+	function displayInfo(argument) {
+		var output = "";
+		if (typeof argument.name == "string") {
+			output = output + "Name: " + argument.name + "\n";
+		}
+		if (typeof argument.age == "number") {
+			output = output + "Age: " + argument.age + "\n";
+		}
+		console.log(output);
+	}
+	displayInfo({
+		name: "Nicholas",
+		age: 29
+	});
+	displayInfo({
+		name: "Greg"
+	});
+</script> 
+
+对象属性点表示法、方括号表示法
+一般情况下，访问对象属性使用的都是点表示法。
+使用方括号表示法时，将要访问的属性以字符串形式放在方括号中。
+person.name
+person["name"]
+
+方括号表示法的优点是可以通过变量访问属性。
+var propName = "name";
+person[propName];
+
+如果属性名中包含非字母非数字，可以使用方括号表示法来访问。
+person["first name"];
+
+尽量使用点表示法访问对象的属性。
+
+
+
+</body>
+</html>

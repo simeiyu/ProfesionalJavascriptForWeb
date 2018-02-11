@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>闭包-函数表达式</title>
+</head>
+<body>
+不少开发人员经常搞不清匿名函数和闭包这两个概念，因此经常混用。
+闭包是指有权访问另一个函数作用域中的变量的函数。
+闭包最常见的创建方式就是在一个函数内部创建另一个函数。
+<script type="text/javascript">
+	 function createComparisonFunction(propertyName) {
+	 	return function (object1, object2) {
+	 		var value1 = object1[propertyName];
+	 		var value2 = object2[propertyName];
+	 		if (value1 > value2) {
+	 			return 1;
+	 		} else if (value1 < value2) {
+	 			return -1;
+	 		} else {
+	 			return 0;
+	 		}
+	 	};
+	 }
+</script>
+内部函数（匿名函数）中的变量value1和value2访问了外部函数中的变量propertyName，即使这个内部函数被返回了，而且是在其他地方被调用了，但他仍然可以访问变量propertyName。
+之所以能够访问这个变量，是因为内部函数的作用域链中包含了createComparisonFunction()的作用域。
+
+在作用域链的概念中，有关如何创建作用域链以及作用域链有什么作用的细节，对彻底理解闭包至关重要。
+当某个函数第一次被调用时，会创建一个执行环境（execution context）及相应的作用域链，并把作用域链赋值给一个特殊的内部属性（即[[Scope]]）。
+然后使用this、arguments、和其他命名参数的值来初始化函数的活动对象（activiation object）。
+<script type="text/javascript">
+	function compare (value1, value2) {
+		if (value1 < value2) {
+			return -1;
+		} else if (value1 > value2) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	var result = compare(5, 10);
+
+	for(var prop in result){
+		console.log(prop + "：" + result[prop]);
+	}
+
+	console.log(Object.keys(result));
+	console.log(Object.getOwnPropertyNames(result));
+
+	for(var prop in compare){
+		console.log(prop + "：" + compare[prop]);
+	}
+
+	console.log(Object.keys(compare));
+	console.log(Object.getOwnPropertyNames(compare));
+</script>
+上面的例子先定义了compare()函数，又在全局作用域中调用了它。
+当第一次调用compare()时，会创建一个包含this、arguments、value1和value2的活动对象。
+全局执行环境的变量对象（包含this、compare、result）在compare()执行环境的作用域链中则处于第二位。
+
+后台的每个执行环境都有一个表示变量的对象——变量对象。全局环境的变量对象始终存在，而像compare()函数这样的局部环境的变量对象，则只在函数执行的过程中存在。
+在创建compare()函数时，会创建一个预先包含全局变量对象的作用域链，这个作用域链被保存在内部的[[Scope]]属性中。
+当调用compare()函数时，会为函数创建一个执行环境，然后通过复制函数的[[Scope]]属性中的对象构建起执行环境的作用域链。
+此后，又有一个活动对象（在此作为变量对象使用）被创建并被推入执行环境作用域链的前端。
+
+作用域链本质上是一个指向变量对象的指针列表，它只引用但不实际包含变量对象。
+
+一般来讲，函数执行完毕后，局部活动对象就会被销毁，内存中仅保存全局作用域（全局执行环境的变量对象）。但是，闭包的情况又有所不同。
+
+<script>
+	// 创建函数
+	var compareNames = createComparisonFunction("name");     // 函数表达式不包含在变量对象中
+
+	// 调用函数
+	var result = compareNames({name: "Nicholas"}, {name: "Greg"});
+	console.log(result);
+
+	// 解除对匿名函数的引用（以便释放内存）
+	compareNames = null;
+</script>
+在匿名函数从createComparisonFunction()中被返回后，它的作用域链被初始化为包含createComparisonFunction()函数的活动对象和全局变量对象。这样，匿名函数就可以访问在createComparisonFunction()中定义的所有变量。
+更为重要的是，createComparisonFunction()函数在执行完毕后，其活动对象也不会被销毁，因为匿名函数的作用域链仍然在引用这个活动对象。
+
+换句话说，当createComparisonFunction()函数返回后，其执行环境的作用域链会被销毁，但它的活动对象仍然会留在内存中；直到匿名函数被销毁后，createComparisonFunction()的活动对象才会被销毁。
+
+-------------------
+关于活动对象的解释：
+当一个函数被调用时，一个特殊的对象，叫做活动对象（activation object）将会被创建。这个对象中包含形参和那个特殊的arguments对象（是对形参的一个映射，但是值是通过索引来获取的）。活动对象会被作为函数执行环境的变量对象来使用。
+换句话说，函数的变量对象也是一个同样简单的变量对象，但是除了变量和函数声明外，它还存储了形参和arguments对象，并叫做活动对象。
+
+7.2.1 闭包与变量 
+作用域链的这种配置机制引出了一个值得注意的副作用，即闭包只能取得包含函数中任何变量的最后一个值。
+<script type="text/javascript">
+	function createFunctions(){
+		var result = new Array();
+		for(var i = 0; i < 10; i++) {
+			result[i] = function(){
+				return i;
+			};
+		}
+		return result;        // 返回一个函数数组
+	}
+
+	console.log(createFunctions()); 
+
+	var another = createFunctions();
+	for(var j = 0; j < another.length; j++){
+		var item = another[j];
+		console.log(item());            // 返回10个10
+	}
+</script>
+createFunctions()函数中的每个匿名函数的作用域链中都保存着createFunctions()函数的活动对象，所以它们引用的都是同一个变量i。
+当createFunction()函数返回后，变量i的值是10，此时每个函数都引用这保存变量i的同一个变量对象，所以在每个函数内部，变量i的值都是10。
+
+<script type="text/javascript">
+	// 开脑洞的。。。。
+	function createFunctions1(){
+		var result = new Array();
+		for(var i = 0; i < 10; i++) {
+			result[i] = function(){
+							return i;
+						}();
+		}
+		return result;    // 返回数组[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	}
+
+	console.log(createFunctions1()); 
+</script>
+
+<script type="text/javascript">
+	// 开脑洞的。。。。
+	function createFunctions2(){
+		var result = new Array();
+		for(var i = 0; i < 10; i++) {
+			result[i] = function(num){
+							return num;
+						}(i);
+		}
+		return result;    // 返回数组[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+	}
+
+	console.log(createFunctions2()); 
+</script>
+
+通过创建另一个匿名函数强制让闭包的行为符合预期：
+<script type="text/javascript">
+	function createFunctions3(){
+		var result = new Array();
+		for(var i = 0; i < 10; i++) {
+			result[i] = function(num){
+				return function(){
+					return num;					
+				};
+			}(i);
+		}
+		return result;    // 返回一个函数数组
+	}
+
+	console.log(createFunctions3()); 
+
+	var another = createFunctions3();
+	for(var j = 0; j < another.length; j++){
+		var item = another[j];
+		console.log(item());            // 返回0到9
+	}
+</script>
+
+
+7.2.2 关于this对象
+this对象是在运行时基于函数的运行环境绑定的：
+在全局函数中，this等于window；而当函数被某个对象的方法调用时，this等于那个对象。
+不过，匿名函数的执行具有全局性，因此，this对象通常指向window。
+<script type="text/javascript">
+	var name = "The Window";
+	var object = {
+		name: "My Object",
+		getNameFunction: function(){
+			return function(){
+				return this.name;
+			}
+		}
+	}
+	console.log(object.getNameFunction()());   // The Window
+</script>
+
+<script type="text/javascript">
+	// 开脑洞的。。。。
+	console.log(this.name);    // The Window
+	
+	function createFunctions4(){
+		this.name = "Function4";
+		this.age = "哥哥十八我十九";
+		return function(){
+			return this.name;
+		}
+	}
+
+	var o = new Object();
+	o.name = "对象";
+
+	console.log(createFunctions4()());    // Function4    createFunctions4()在全局环境执行时，重置了全局对象的name属性。
+	// console.log(createFunctions4.call(o)());    // The Window    在对象o的作用域中执行createFunction4()函数时，全局环境的name没有被改变,o对象的name值被改变。
+	// console.log(o.name);    // Function4
+
+	var propNames = Object.getOwnPropertyNames(createFunctions4);
+	console.log(createFunctions4[propNames[1]]);    // createFunctions4
+	console.log(createFunctions4[propNames[2]]);    // null
+
+
+	console.log(this.name);    // Function4    ????
+	console.log(this.age);    // 哥哥十八我十九
+</script>
+
+每个函数在被调用时，其函数对象都会自动取得两个特殊变量：this和arguments。内部函数在搜索这两个变量时，只会搜索到其活动对象为止，因此永远不可能访问到外部函数中的这两个变量。
+如果把外部作用域的这两个对象保存在一个闭包能够访问的变量里，就可以让闭包访问该对象了。
+改写上面的代码：
+<script type="text/javascript">
+	var name = "The Window";
+	var object = {
+		name: "My Object",
+		getNameFunction: function(){
+			var that = this;
+			return function(){
+				return that.name;
+			}
+		}
+	}
+	console.log(object.getNameFunction()());   // My Object
+</script>
+
+<script type="text/javascript">
+	// 开脑洞的。。。。	
+	function createFunctions4(){
+		this.age = "哥哥十八我十九";
+		var that = this;
+		return function(){
+			return that.name;
+		}
+	}
+
+	var o = new Object();
+	o.name = "对象";
+
+	console.log(createFunctions4.call(o)());    // 对象
+	console.log(o.age);    // 哥哥十八我十九
+</script>
+
+
+在几种特殊情况下，this的值可能会意外地改变:
+<script type="text/javascript">
+	var name = "The Window";
+	var object = {
+		name: "My Object",
+		getName: function(){
+			return this.name;
+		}
+	}
+
+	var way_1 = object.getName();        // My Object
+	var way_2 = (object.getName)();       // My Object
+	console.log(way_1);
+	console.log(way_2);
+
+	var way_3 = (object.getName = object.getName)();     // 因为这个赋值表达式的值是函数本身，所有this的值不能得到维持。  ????
+	console.log(way_3);       // The Window (在非严格模式下)
+
+	object.getName = object.getName;
+	var way_4 = object.getName();
+	console.log(way_4);       // My Object
+
+	var way_5 = object.getName;
+	console.log(way_5());       // The Window
+</script>
+即使是语法的细微变化，都有可能意外改变this的值。
+
+
+7.2.3 内存泄漏
+因为不同的垃圾收集例程，闭包在IE9之前的版本中会导致一些问题。
+如果闭包的作用域链中保存着一个HTML元素，那么就意味着该元素无法被销毁。
+<script type="text/javascript">
+	function assignHandle(){
+		var element = document.getElementById("someElement");
+		element.onclick = function(){
+			alert(element.id);
+		};
+	}
+</script>
+只要匿名函数存在，element的引用至少也是1，因此它所占用的内存永远不会被收回。
+改写上面的代码：
+<script type="text/javascript">
+	function assignHandle(){
+		var element = document.getElementById("someElement");
+		var id = element.id;
+
+		element.onclick = function(){
+			alert(id);
+		};
+
+		element = null;
+	}
+</script>
+通过把element.id的一个副本保存在一个变量中，并且在闭包中引用该变量消除了循环引用。（？循环引用？？）
+闭包会引用包含函数的整个活动对象，而其中包含着element。即使闭包不直接引用element，包含函数的活动对象中也仍然会保存一个引用。
+因此，有必要把element变量设置为null。这样就能解除对DOM对象的引用，顺利地减少其引用数，确保正常收回其占用的内存。
+
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>DOM操作技术-DOM</title>
+</head>
+<body>
+10.2.1 动态脚本
+动态脚本指的是在页面加载时不存在，但将来某一时刻通过修改DOM动态添加的脚本。
+跟操作HTML元素一样，创建动态脚本也有两种方式：插入外部文件和直接插入JavaScript代码。
+动态加载外部文件：
+<script type="text/javascript">
+	var script = document.createElement("script");
+	script.src = "client.js";
+	script.type = "text/javascript";
+	document.body.appendChild(script);
+
+	// 封装成函数
+	function loadScript (url) {
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src = url;
+		document.body.appendChild(script);
+	}
+</script>
+行内方式插入JavaScript代码：
+<script type="text/javascript">
+	// 封装函数
+	function loadScriptString (code) {
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		try {
+			script.appendChild(document.createTextNode(code));
+		} catch (ex) {
+			script.text = code;
+		}
+		document.body.appendChild(script);
+	}
+
+	// 调用函数
+	loadScriptString("console.log('动态插入行内脚本代码！')");
+</script>
+这样执行代码与在全局作用域中把相同的字符串传递给eval()是一样的。
+<script type="text/javascript">
+	eval("console.log('在全局作用域中把相同的字符串传递给eval()')");
+</script>
+
+
+10.2.2 动态样式
+所谓动态样式，是指在页面加载时不存在的样式；动态样式是在页面加载完成后动态添加到页面中的。
+<script type="text/javascript">
+	function loadStyles(url){
+		var link = document.createElement("link");
+		link.rel = "stylesheet";
+		link.type = "text/css";
+		link.href = url;
+		var head = document.getElementsByTagName("head")[0];
+		head.appendChild(link);
+	}
+
+	// 调用函数
+	loadStyles("styles.css");
+</script>
+加载外部样式文件的过程是异步的。
+
+另一种定义样式的方式是使用style元素来包含嵌入式CSS：
+<script type="text/javascript">
+	function loadStyleString(css){
+		var style = document.createElement("style");
+		style.type = "text/css";
+		try {
+			style.appendChild(document.createTextNode(css));
+		} catch (ex) {
+			style.stylesheet.cssText = css;
+		}
+		var head = document.getElementsByTagName("head")[0];
+		head.appendChild(style);
+	}
+
+	// 调用函数
+	loadStyleString("body {background-color: orange;}");
+</script>
+
+
+
+10.2.3 操作表格
+使用核心DOM编写表格往往需要大量代码。为了方便构建表格，HTML DOM为table、tboday、tr元素添加了一些属性和方法。
+
+为table元素添加的属性和方法如下：
+· caption：保存着对caption元素（如果有）的指针；
+· tBodies：是一个tbody元素的HTMLCollection；
+· tFoot：保存着对tfoot元素的（如果有）指针；
+· tHead：保存着对thead元素的（如果有）指针；
+· rows：是一个表格中所有行的HTMLCollection。
+· createTHead()：创建thead元素，将其放到表格中，返回引用；
+· createTFoot()：创建tfoot元素，将其放到表格中，返回引用；
+· createCaption()：创建caption元素，将其放到表格中，返回引用。
+· deleteTHead()：删除thead元素；
+· deleteTFoot()：删除tfoot元素；
+· deleteCaption()：删除caption元素；
+· deleteRow(pos)：删除指定位置的行；
+· insertRow(pos)：向rows集合中的指定位置插入一行，返回对新插入行的引用。
+
+为tbody元素添加的属性和方法如下：
+· rows：保存着tbody中所有行的HTMLCollection；
+· deleteRow(pos)：删除指定位置的行；
+· insertRow(pos)：向rows集合中的指定位置插入一行。
+
+为tr元素添加的属性和方法如下：
+· cells：保存着tr元素中单元格的HTMLCollection；
+· deleteCell(pos)：删除指定位置的单元格；
+· insertCell(pos)：向cells集合中的指定位置插入一个单元格，返回对新插入单元格的引用。
+<script type="text/javascript">
+	// 创建表格
+	var table = document.createElement("table");
+	table.width = "100%";
+	table.border = "1";
+	// 创建tbody
+	var tbody = document.createElement("tbody");
+	table.appendChild(tbody);
+
+	// 创建第一行
+	tbody.insertRow(0);
+	tbody.rows[0].insertCell(0);
+	tbody.rows[0].cells[0].appendChild(document.createTextNode("Cell 1, 1"));
+	tbody.rows[0].insertCell(1);
+	tbody.rows[0].cells[1].appendChild(document.createTextNode("Cell 2, 1"));
+
+	// 创建第二行
+	tbody.insertRow(1);
+	tbody.rows[1].insertCell(0);
+	tbody.rows[1].cells[0].appendChild(document.createTextNode("cell 1, 2"));
+	tbody.rows[1].insertCell(1);
+	tbody.rows[1].cells[1].appendChild(document.createTextNode("cell 2, 2"));
+
+	document.body.appendChild(table);
+</script>
+
+
+
+10.2.4 使用NodeList
+理解NodeList及其“近亲”NamedNodeMap和HTMLCollection，是从整体上透彻理解DOM的关键所在。
+这三个集合都是“动态”的，即每当文档结构发生变化时，它们都会得到更新。
+<script type="text/javascript">
+	var divs = document.getElementsByTagName("div"),
+		i,
+		len,
+		div;
+	for(i = 0, len = divs.length; i < len; i++) {   // for(i=0; i<divs.length; i++){  会无限循环
+		div = document.createElement("div");
+		document.body.appendChild(div);
+	}
+
+</script>
+
+</body>
+</html> 

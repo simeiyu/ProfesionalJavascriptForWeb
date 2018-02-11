@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>选择框脚本 - 表单脚本</title>
+</head>
+<body>
+除了所有表单字段共有的属性和方法外，HTMLSelectElement类型还提供了下列属性和方法：
+· add(newOption, relOption)：向控件中插入新option元素，其位置在相关项（relOption）之前。
+· multiple：布尔值，表示是否允许多项选择；等价于HTML中的multiple特性。
+· options：控件中所有option元素的HTMLCollection。
+· remove(index)：移除给定位置的选项。
+· selectedIndex：基于0的选中项的索引，如果没有选中项，则值为-1。对于支持多选的控件，只保存选中项中第一项的索引。
+· size：选择框中可见的行数；等价于html中的size特性。
+选择框的type属性不是“select-one”就是“select-multiple”，取决于html代码中有没有multiple特性。
+选择框的value属性由当前选中项决定。
+<fieldset>
+	<legend>文本框</legend>
+	<form name="form1" action="#" method="post">
+		<div style="margin-bottom: 10px;">
+			<label for="name" autofocus>姓名：</label>
+			<input type="text" name="name" value="小甜甜">
+		</div>
+		<div style="margin-bottom: 10px;">
+			<label for="card">证件：</label>
+			<select name="card">
+				<option>--请选择--</option>
+				<option value="1">身份证</option>
+				<option value="2">ID卡</option>
+				<option value="3">学生证</option>
+				<option value="4">签证</option>
+			</select>
+		</div>
+		<div style="margin-bottom: 10px;">
+			<label for="car">车型：</label>
+			<select name="car" multiple="multiple" size="4">
+				<optgroup label="大众">
+					<option>高尔夫</option>
+					<option>甲壳虫</option>
+					<option>尚酷</option>
+					<option>途观</option>
+				</optgroup>
+				<optgroup label="Jeep">
+					<option>自由侠</option>
+					<option>自由光</option>
+					<option>牧马人</option>
+					<option>大切诺基</option>
+				</optgroup>
+			</select>
+		</div>
+		<div style="margin-bottom: 10px;">
+			<label for="description" style="vertical-align: top;">描述：</label>
+			<textarea rows="5" cols="62" name="description">这是一个可爱的小姑娘！</textarea>
+		</div>
+		<hr>
+		<input type="submit" name="submit" value="提交">
+	</form>
+</fieldset>
+<hr>
+<script type="text/javascript">
+	var selectbox = document.forms[0].elements["card"];
+	console.log("multiple：" + selectbox.multiple);            // false
+	console.log("selectedIndex：" + selectbox.selectedIndex);  //0
+	console.log("size：" + selectbox.size);    // 0
+	console.log("type：" + selectbox.type);    // select-one
+	console.log("value：" + selectbox.value);  // --请选择--
+	console.log("options：" + selectbox.options.length);  // 5
+</script>
+ 在DOM中，每个option元素都有一个HTMLOptionElement对象表示，该对象添加了下列属性：
+ · index：当前选项在options集合中的索引。
+ · label：当前选项的标签，等价于HTML中的label特性。
+ · selected：布尔值，表示当前选项是否被选中。将这个属性设为true可以选中当前选项。
+ · text：选项的文本。
+ · value：选项的值；等价于HTML中value特性。
+ <script type="text/javascript">
+ 	// 选项的文本
+ 	var text = selectbox.options[0].text;
+ 	// 选项的值
+ 	var value = selectbox.options[0].value;
+
+ 	console.log(text + ":" + value);
+
+ 	selectbox.addEventListener("change", function(event){
+ 		var target = event.target;
+ 		var selectedIndex = target.selectedIndex;
+		var selectedOption = target.options[target.selectedIndex];
+		console.log("Selected Index：" + selectedIndex + "\nSelected Text:" + selectedOption.text + "\nSelected Value:" + selectedOption.value);
+ 	})
+ </script>
+
+-----------------------------
+14.3.1 选择选项
+类型为select-one的选择框，访问选中项的最简单方式：使用选择框的selectedIndex属性。如 行86。
+类型为select-multiple的选择框，读取selectedIndex只会返回选中项中第一项的索引值；设置selectedIndex会选择指定的那一项但同时会取消之前选中的其他项。
+利用selected属性确定用户选择了选择框中的哪一项：
+<script type="text/javascript">
+	function getSelectedOptions (selectbox) {
+		var result = new Array();
+		var option = null;
+		for (var i = 0, len = selectbox.options.length; i < len; i++) {
+			option = selectbox.options[i];
+			if (option.selected == true) {
+				result.push(option);
+			}
+		}
+		return result;
+	}
+	var cars = document.getElementsByName("car")[0];
+	cars.addEventListener("blur", function(event){
+		var target = event.target;
+		var message = "";
+		var selectedOptions = getSelectedOptions(target);
+		for (var i = 0; i < selectedOptions.length; i++){
+			message += "Selected Index：" + selectedOptions[i].index + "\nSelected Value："+ selectedOptions[i].value + "\nSelected Text：" + selectedOptions[i].text + "\n\n";
+		}
+		console.log(message);
+	})
+</script>
+
+-------------------------------
+14.3.2 添加选项
+可以使用JavaScript动态添加选项，并将它们添加到选择框中。
+使用DOM方法：
+<script type="text/javascript">
+	var option = document.createElement("option");
+	option.appendChild(document.createTextNode("我是新增的"));
+	option.value = "i am new";
+	selectbox.appendChild(option);
+</script>
+使用Option构造函数：
+<script type="text/javascript">
+	var newOption = new Option("欧迈大儿子", "yoyo"); // 第一个参数是text，第二个参数是value
+	selectbox.appendChild(newOption);  // 在IE8及之前版本中有问题
+</script>
+使用选择框的add()方法：
+<script type="text/javascript">
+	var newOption = new Option("往事只能回味", "龙飘飘");
+	selectbox.add(newOption, undefined);  // 最佳方案（第二个参数为undefined，插入到列表最后）
+</script>
+
+------------------------------
+14.3.3 移除选项
+DOM的removeChild()方法、
+选择框的remove()方法、
+将相应选项设置为null。
+要清除选择框中的所有项，需要迭代所有选项并逐个移除它们。
+<script type="text/javascript">
+	selectbox.removeChild(selectbox.options[0]);
+	selectbox.remove(0);
+	selectbox.options[0] = null;
+
+	// 移除所有选项
+	function clearSelectbox(selectbox){
+		var i = 0,
+			len = selectbox.options.length;
+		for(i = 0; i < len; i++){
+			selectbox.remove(0);
+		}
+	}
+
+	document.forms[0].addEventListener("submit", function(event){
+		var target = event.target;
+		var selectbox = target.elements["card"];
+		clearSelectbox(selectbox);
+		event.preventDefault();
+	});
+</script>
+
+---------------------
+14.3.4 移动和重排选项
+如果为appendChild()方法传入一个文档中已有的元素，那么就会先从该元素的父节点中移除它，再把它添加到指定的位置。
+移动选项和移除选项都会重置每一个选项的index值。
+<script type="text/javascript">
+	selectbox.appendChild(cars.options[0]);
+</script>
+重排用insertBefore()
+<script type="text/javascript">
+	var optionToMove = selectbox.options[1];
+	// 向前移动一项
+	// selectbox.insertBefore(optionToMove, selectbox.options[optionToMove.index-1]);
+	// 向后移动一项
+	selectbox.insertBefore(optionToMove, selectbox.options[optionToMove.index+2]);
+
+</script>
+
+
+
+
+
+</body>
+</html>  

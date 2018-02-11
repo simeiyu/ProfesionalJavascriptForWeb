@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>window.requestAnimationFrame</title>
+  <style>
+    #box {
+      width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      background-color: orangered;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>requestAnimationFrame:</h2>
+  <div id="box"></div>
+  <script src="./RequestAnimationFrame/requestAnimationFrame.js"></script>
+  <script>
+    var box = document.getElementById('box');
+    var t = 0;
+
+    function myRequestAnimationFrame() {
+      if (t < 500) {
+        t++;
+      }
+      box.style.marginLeft = t + 'px';
+      window.requestAnimationFrame(myRequestAnimationFrame);
+    }
+    window.requestAnimationFrame(myRequestAnimationFrame);
+  </script>
+</body>
+
+</html>
