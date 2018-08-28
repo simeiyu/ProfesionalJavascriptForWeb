@@ -75,7 +75,7 @@ ES中的构造函数可以用来创建特定类型的对象。像Object和Array�
 
 	// 作为普通函数调用
 	Person("Ami", 31, "my husband");
-	window.sayName;
+	window.sayName();
 
 	// 在另一个对象的作用域中调用
 	var o = new Object();
@@ -261,6 +261,7 @@ ES5增加了一个方法，Object.getPrototypeOf()，在所有支持的实现中
 	}
 	console.log(Object.getOwnPropertyNames(array));   // 0, 1, length
 	console.log(Object.keys(Array.prototype));          // 空数组
+	console.log(Object.keys(array));          // 空数组
 	console.log(Object.getOwnPropertyNames(Array.prototype));   // ["length", "constructor", "toString", "toLocaleString", "join", "pop", "push", "reverse", "shift", "unshift", "slice", "splice", "sort", "filter", "forEach", "some", "every", "map", "indexOf", "lastIndexOf", "reduce", "reduceRight", "copyWithin", "find", "findIndex", "fill", "includes", "entries", "keys", "concat"]
 </script>
 不可枚举的属性和方法包括：

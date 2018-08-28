@@ -305,5 +305,37 @@ this对象是在运行时基于函数的运行环境绑定的：
 闭包会引用包含函数的整个活动对象，而其中包含着element。即使闭包不直接引用element，包含函数的活动对象中也仍然会保存一个引用。
 因此，有必要把element变量设置为null。这样就能解除对DOM对象的引用，顺利地减少其引用数，确保正常收回其占用的内存。
 
+<script>
+	function b(f, param) {
+		var result = f() + param
+		console.log("b", result)
+	}
+	function c(param) {
+		console.log("c", param)
+	}
+
+	function a() {
+		var a1 = 1
+		console.log('a1', a1)
+		return a1
+	}
+	b(a, 2)
+	
+
+	function parent() {
+		var parentContext = 'this is parent context'
+		var c
+		// var sum = a + c
+		console.log(parentContext, "c -->", c)
+		// console.log(parentContext, "sum -->", sum)
+		return function (b) {
+			c = b
+			var variableContext = 'this is child context';
+			console.log(variableContext, "b: ", b)
+		}
+	}
+	parent()(3)
+</script>
+
 </body>
 </html>

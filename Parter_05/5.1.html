@@ -42,8 +42,26 @@ person[propName];
 person["first name"];
 
 尽量使用点表示法访问对象的属性。
-
-
+<div>
+	<button id="btn">change obj</button>
+</div>
+<script>
+	var obj = {
+		one: 0,
+		two: 12
+	}
+	var btn = document.getElementById('btn')
+	console.log(obj)
+	// btn.addEventListener('click', function() {
+	// 	obj.one ++
+	// 	console.log('obj--->', obj)
+	// })
+	btn.addEventListener('click', function() {
+		obj.one ++
+		obj.tow + 1
+		console.log('obj--->', obj)
+	})
+</script>
 
 </body>
 </html>
