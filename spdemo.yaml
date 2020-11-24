@@ -1,0 +1,118 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: suanpan-web
+  name: suanpan-web
+  namespace: demo
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: suanpan-web
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: suanpan-web
+    spec:
+      containers:
+      - command:
+        - /sbin/my_init
+        - --
+        - ./server.out
+        env:
+        - name: SP_CONFIG
+          value: /snapshot/suanpan/config/default.js,/home/config/xuelang.js,/home/config/rnd.js
+        image: registry.cn-shanghai.aliyuncs.com/shuzhi/suanpan-web:2.98.99.spdemo-1120
+        imagePullPolicy: Always
+        name: suanpan-web
+        ports:
+        - containerPort: 7000
+          name: http
+          protocol: TCP
+        resources: {}
+        securityContext:
+          privileged: true
+          procMount: Default
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /home/config/xuelang.js
+          name: config
+          subPath: xuelang.js
+        - mountPath: /home/config/rnd.js
+          name: config
+          subPath: rnd.js
+        - mountPath: /usr/hadoop-2.7.6/etc/hadoop/core-site.xml
+          name: emr-config
+          subPath: core-site.xml
+        - mountPath: /usr/hadoop-2.7.6/etc/hadoop/hdfs-site.xml
+          name: emr-config
+          subPath: hdfs-site.xml
+        - mountPath: /usr/hadoop-2.7.6/etc/hadoop/yarn-site.xml
+          name: emr-config
+          subPath: yarn-site.xml
+        - mountPath: /usr/apache-hive-2.3.3-bin/conf/hive-site.xml
+          name: emr-config
+          subPath: hive-site.xml
+        - mountPath: /usr/spark-2.3.1/conf/spark-defaults.conf
+          name: emr-config
+          subPath: spark-defaults.conf
+        - mountPath: /usr/spark-2.3.1/conf/spark-env.sh
+          name: emr-config
+          subPath: spark-env.sh
+      dnsPolicy: ClusterFirst
+      hostAliases:
+      - hostnames:
+        - emr-header-1.cluster-79652
+        - emr-header-1
+        - iz2ze0wn45z3cf62ha4t6qz
+        ip: 172.17.198.246
+      - hostnames:
+        - emr-header-2.cluster-79652
+        - emr-header-2
+        - iz2zefxbnbm97i7hiewjguz
+        ip: 172.17.198.247
+      - hostnames:
+        - emr-worker-1.cluster-79652
+        - emr-worker-1
+        - emr-header-3
+        - emr-header-3.cluster-79652
+        - iz2zeb0n9u37mwsqs6yf8bz
+        ip: 172.17.198.248
+      - hostnames:
+        - emr-worker-2.cluster-79652
+        - emr-worker-2
+        - iz2ze5pbddnxoo710i6o02z
+        ip: 172.17.198.249
+      - hostnames:
+        - emr-worker-3.cluster-79652
+        - emr-worker-3
+        - iz2ze6jovvln1cf2w1a5fhz
+        ip: 172.17.198.250
+      - hostnames:
+        - emr-worker-4.cluster-79652
+        - emr-worker-4
+        - iz2zefremjjp3qzv4xxbjnz
+        ip: 172.17.198.251
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: suanpan-config
+        name: config
+      - configMap:
+          defaultMode: 420
+          name: emr-config
+        name: emr-config
+
