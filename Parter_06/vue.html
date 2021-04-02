@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    let car = {
+      brand: 'BMW',
+      price: 3000
+    };
+    Object.defineProperty(car, 'price', {
+      configurable: true,
+      enumerable: true,
+      get() {
+        console.log('price 属性被读取了')
+        return val
+      },
+      set(newVal) {
+        console.log('price 属性被修改了')
+        val = newVal
+      }
+    });
+    let person = {
+      get firstName() {
+        return 'Nicholas'
+      },
+      sayName() {
+        console.log('this.name')
+      }
+    };
+    function Person(name) {
+      console.log('target: ', typeof new.target === Person, ', type of target: ', typeof new.target)
+      this.name = name;
+    }
+  </script>
+</body>
+</html>
